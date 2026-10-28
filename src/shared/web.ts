@@ -1,4 +1,5 @@
-// "dom" lib augmentations that also work under @types/node, which declares these globals too.
+// Web API augmentations shared by the dom and node entries: both the DOM lib and @types/node
+// declare these globals. Anything DOM-only belongs in dom/index.ts.
 
 import type { AbsoluteUrl, Base64, PerformanceTimestamp, UUID } from "../index.ts";
 

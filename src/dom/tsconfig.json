@@ -14,7 +14,6 @@
 		"isolatedDeclarations": true
 	},
 	"include": [
-		"index.ts",
-		"common.ts"
+		"index.ts"
 	]
 }

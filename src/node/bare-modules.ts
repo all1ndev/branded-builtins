@@ -1,8 +1,8 @@
 /// <reference types="node" preserve="true" />
-/// <reference path="../node-globals.ts" preserve="true" />
 
-// Augmentations shared by @types/node 22 and 24, which declare their modules under bare names
-// ("fs") and re-export them from "node:fs". node22/index.ts and node24/index.ts build on this file.
+// Module overloads for @types/node versions that declare modules under bare names ("fs") and
+// re-export them from "node:fs": 22 and 24. If a version drops an API, move its overload out
+// of here into the older entries.
 
 import type {
 	AbsolutePath,
@@ -34,8 +34,7 @@ import type {
 	ReadPosition,
 	StatOptions,
 } from "node:fs";
-
-import type { BrandedAddressInfo, BrandedLookupAddress, BrandedStats } from "../node-types.ts";
+import type { BrandedAddressInfo, BrandedLookupAddress, BrandedStats } from "./types.ts";
 
 // Augmentations are merged with higher priority, so these overloads win over the originals.
 // Only the module that holds the declarations can be augmented: augmenting a module that

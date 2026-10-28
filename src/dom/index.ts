@@ -1,4 +1,4 @@
-/// <reference path="./common.ts" preserve="true" />
+/// <reference path="../shared/web.ts" preserve="true" />
 
 // Augmentations for APIs in TypeScript's "dom" lib.
 

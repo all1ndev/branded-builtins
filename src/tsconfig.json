@@ -6,8 +6,6 @@
 		]
 	},
 	"include": [
-		"index.ts",
-		"node-globals.ts",
-		"node-types.ts"
+		"index.ts"
 	]
 }

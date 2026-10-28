@@ -86,7 +86,7 @@ Each entry adds overloads to the built-in declarations through declaration mergi
 
 ## Versioning
 
-New brands can break existing code (see [Caveats](#caveats)). While the version is `0.x`, new brands ship in minor releases. From `1.0`, any new brand is a major release, and fixes to existing brands are patches.
+New brands ship in minor releases. Stricter types are the point of this package, so code that relied on a plain type may need an annotation after an upgrade (see [Caveats](#caveats)). Renaming or removing an exported brand type is a major release.
 
 ## License
 

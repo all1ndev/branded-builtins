@@ -1,7 +1,8 @@
 /// <reference types="node" preserve="true" />
-/// <reference path="../node-globals.ts" preserve="true" />
+/// <reference path="../node/globals.ts" preserve="true" />
 
-// Augmentations for @types/node 26.
+// Augmentations for @types/node 26, which declares its modules under "node:fs" and re-exports
+// them from "fs". No other entry shares this layout yet, so its module overloads live here.
 
 import type {
 	AbsolutePath,
@@ -34,8 +35,7 @@ import type {
 	ReadPosition,
 	StatOptions,
 } from "node:fs";
-
-import type { BrandedAddressInfo, BrandedLookupAddress, BrandedStats, EventLoopDelays } from "../node-types.ts";
+import type { BrandedAddressInfo, BrandedLookupAddress, BrandedStats, EventLoopDelays } from "../node/types.ts";
 
 // Augmentations are merged with higher priority, so these overloads win over the originals.
 // Only the module that holds the declarations can be augmented: augmenting a module that

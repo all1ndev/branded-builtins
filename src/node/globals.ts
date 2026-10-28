@@ -1,9 +1,10 @@
 /// <reference types="node" preserve="true" />
-/// <reference path="./dom/common.ts" preserve="true" />
+/// <reference path="../shared/web.ts" preserve="true" />
 
-// Global augmentations shared by the node22, node24 and node26 entries.
+// Global augmentations for every node entry: these globals are the same in each @types/node.
+// If a version drops one, move its overload out of here into the older entries.
 
-import type { AbsolutePath, Base64, Base64Url, BigIntNanoseconds, Bytes, Hex, Kilobytes, Microseconds, Seconds } from "./index.ts";
+import type { AbsolutePath, Base64, Base64Url, BigIntNanoseconds, Bytes, Hex, Kilobytes, Microseconds, Seconds } from "../index.ts";
 
 declare global {
 	interface Buffer {
@@ -15,7 +16,7 @@ declare global {
 		byteLength(string: string | NodeJS.ArrayBufferView | ArrayBufferLike, encoding?: BufferEncoding): Bytes;
 	}
 
-	// Also in dom/common.ts, but that file loads before @types/node declares btoa, and the
+	// Also in shared/web.ts, but that file loads before @types/node declares btoa, and the
 	// overload from the later file wins.
 	function btoa(data: string): Base64;
 
