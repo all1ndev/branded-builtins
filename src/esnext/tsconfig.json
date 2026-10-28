@@ -1,0 +1,18 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		"types": [],
+		"lib": [
+			"esnext"
+		],
+		"rootDir": "..",
+		"outDir": "../../dist",
+		"noEmit": false,
+		"declaration": true,
+		"emitDeclarationOnly": true,
+		"isolatedDeclarations": true
+	},
+	"include": [
+		"index.ts"
+	]
+}

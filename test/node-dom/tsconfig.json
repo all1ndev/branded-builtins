@@ -1,0 +1,17 @@
+{
+	"extends": "../tsconfig.json",
+	"compilerOptions": {
+		"lib": [
+			"es2024",
+			"dom"
+		]
+	},
+	"include": [
+		"index.mts",
+		"../index.mts",
+		"../node24.mts",
+		"../../dist/node26/index.d.ts",
+		"../../dist/dom/index.d.ts",
+		"../../dist/es2024/index.d.ts"
+	]
+}

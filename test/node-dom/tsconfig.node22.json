@@ -1,0 +1,15 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"typeRoots": [
+			"../../node_modules/@types22"
+		]
+	},
+	"include": [
+		"index.mts",
+		"../index.mts",
+		"../../dist/node22/index.d.ts",
+		"../../dist/dom/index.d.ts",
+		"../../dist/es2024/index.d.ts"
+	]
+}

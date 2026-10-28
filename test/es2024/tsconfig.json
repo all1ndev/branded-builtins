@@ -1,0 +1,10 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		"types": []
+	},
+	"include": [
+		"index.mts",
+		"../../dist/es2024/index.d.ts"
+	]
+}

@@ -1,0 +1,20 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		"typeRoots": [
+			"../../node_modules/@types26"
+		],
+		"rootDir": "..",
+		"outDir": "../../dist",
+		"noEmit": false,
+		"declaration": true,
+		"emitDeclarationOnly": true,
+		"isolatedDeclarations": true,
+		"lib": [
+			"es2024"
+		]
+	},
+	"include": [
+		"index.ts"
+	]
+}
