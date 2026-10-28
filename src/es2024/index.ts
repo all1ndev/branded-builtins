@@ -8,12 +8,14 @@ import type {
 	Finite,
 	Integer,
 	IsoUtcString,
+	Minutes,
 	Json,
 	NfcString,
 	NfdString,
 	NfkcString,
 	NfkdString,
 	SafeInteger,
+	WellFormedString,
 } from "../index.ts";
 
 declare global {
@@ -38,6 +40,7 @@ declare global {
 		toISOString(): IsoUtcString;
 		// null at runtime for an invalid date, which the lib's `string` already ignores.
 		toJSON(key?: any): IsoUtcString;
+		getTimezoneOffset(): Minutes;
 	}
 
 	interface String {
@@ -47,12 +50,22 @@ declare global {
 		normalize(form: "NFKD"): NfkdString;
 		// NFC is the default form.
 		normalize(): NfcString;
+		isWellFormed(): this is WellFormedString;
+		toWellFormed(): WellFormedString;
 	}
 
 	interface NumberConstructor {
 		isFinite(number: unknown): number is Finite;
 		isInteger(number: unknown): number is Integer;
 		isSafeInteger(number: unknown): number is SafeInteger;
+	}
+
+	// Only for Finite input: Math.floor(Infinity) is Infinity and Math.floor(NaN) is NaN.
+	interface Math {
+		floor(x: Finite): Integer;
+		ceil(x: Finite): Integer;
+		round(x: Finite): Integer;
+		trunc(x: Finite): Integer;
 	}
 
 	interface JSON {

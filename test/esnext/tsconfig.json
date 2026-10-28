@@ -4,5 +4,5 @@
 		"types": [],
 		"lib": ["esnext"]
 	},
-	"include": ["../es2024/index.mts", "../../dist/esnext/index.d.ts"]
+	"include": ["index.mts", "../es2024/index.mts", "../../dist/esnext/index.d.ts"]
 }

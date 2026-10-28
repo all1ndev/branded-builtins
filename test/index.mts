@@ -85,6 +85,10 @@ fs.closeSync(1) satisfies B.FileDescriptor;
 
 // Encodings
 const buf = Buffer.from(raw);
+buf.write(raw) satisfies B.Bytes;
+buf.write(raw, 0, "utf8") satisfies B.Bytes;
+buf.write(raw, 0, 1, "utf8") satisfies B.Bytes;
+buf.copy(new Uint8Array(4)) satisfies B.Bytes;
 buf.toString("hex") satisfies B.Hex;
 buf.toString("base64") satisfies B.Base64;
 buf.toString("base64url") satisfies B.Base64Url;
@@ -124,6 +128,9 @@ os.uptime() satisfies B.Milliseconds;
 
 // Bytes
 os.totalmem() satisfies B.Bytes;
+os.cpus()[0]?.times.idle satisfies B.Milliseconds | undefined;
+crypto.randomInt(10) satisfies B.SafeInteger;
+crypto.randomInt(1, 10) satisfies B.SafeInteger;
 os.freemem() satisfies B.Bytes;
 process.memoryUsage().heapUsed satisfies B.Bytes;
 process.memoryUsage.rss() satisfies B.Bytes;

@@ -21,6 +21,10 @@ declare global {
 		toString(encoding: "hex", start?: number, end?: number): Hex;
 		toString(encoding: "base64", start?: number, end?: number): Base64;
 		toString(encoding: "base64url", start?: number, end?: number): Base64Url;
+		write(string: string, encoding?: BufferEncoding): Bytes;
+		write(string: string, offset: number, encoding?: BufferEncoding): Bytes;
+		write(string: string, offset: number, length: number, encoding?: BufferEncoding): Bytes;
+		copy(target: Uint8Array, targetStart?: number, sourceStart?: number, sourceEnd?: number): Bytes;
 	}
 	interface BufferConstructor {
 		byteLength(string: string | NodeJS.ArrayBufferView | ArrayBufferLike, encoding?: BufferEncoding): Bytes;

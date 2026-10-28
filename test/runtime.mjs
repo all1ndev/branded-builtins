@@ -1,5 +1,6 @@
 // Checks at runtime the facts the brands claim. Types alone can't prove these.
 import assert from "node:assert/strict";
+import { randomInt } from "node:crypto";
 import fs from "node:fs";
 import { createRequire, findPackageJSON } from "node:module";
 import os from "node:os";
@@ -58,6 +59,19 @@ fs.rmSync(dir, { recursive: true });
 assert.match(new Date(0).toISOString(), /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
 assert.throws(() => new Date(NaN).toISOString(), RangeError);
 assert.equal("e\u0301".normalize(), "e\u0301".normalize("NFC"));
+assert.ok("a\ud800".toWellFormed().isWellFormed());
+assert.ok(Math.abs(new Date().getTimezoneOffset()) <= 14 * 60, "getTimezoneOffset is minutes");
+// es2025 and esnext, on Node versions that have them.
+if (RegExp.escape) assert.ok(new RegExp(RegExp.escape("a.b")).test("a.b"));
+if (Uint8Array.prototype.toBase64) {
+	const bytes = new Uint8Array([251, 255]);
+	assert.equal(bytes.toBase64(), Buffer.from(bytes).toString("base64"));
+	assert.equal(
+		bytes.toBase64({ alphabet: "base64url", omitPadding: true }),
+		Buffer.from(bytes).toString("base64url"),
+	);
+	assert.equal(bytes.toHex(), Buffer.from(bytes).toString("hex"));
+}
 
 // URL serializes to an absolute URL.
 assert.ok(URL.canParse(new URL("../a?b#c", "https://example.com/x/y").toString()));
@@ -66,6 +80,10 @@ assert.ok(URL.canParse(new URL("../a?b#c", "https://example.com/x/y").toString()
 assert.ok(Math.abs(fs.statSync(".").mtimeMs - Date.now()) < 1e12, "mtimeMs is epoch milliseconds");
 const rssKilobytes = process.resourceUsage().maxRSS;
 assert.ok(rssKilobytes * 1024 >= process.memoryUsage.rss() / 4, "maxRSS is kilobytes");
+assert.equal(Buffer.alloc(4).write("é"), 2, "Buffer#write returns bytes");
+assert.equal(Buffer.from("é").copy(new Uint8Array(4)), 2, "Buffer#copy returns bytes");
+assert.ok(Number.isSafeInteger(randomInt(2 ** 47)));
+assert.ok(os.cpus()[0].times.idle <= os.uptime() * 1000 * 2, "cpus() times are milliseconds");
 const cpu = process.cpuUsage();
 assert.ok(cpu.user > 1000, "cpuUsage is microseconds");
 const delays = monitorEventLoopDelay({ resolution: 10 });

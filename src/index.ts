@@ -13,7 +13,9 @@ export type AbsolutePath = Brand<string, "AbsolutePath">;
 export type FileDescriptor = Brand<number, "FileDescriptor">;
 
 export type Hex = Brand<string, "Hex">;
+/** Base64 with the standard alphabet (`+/`). Padding may be omitted. */
 export type Base64 = Brand<string, "Base64">;
+/** Base64 with the URL-safe alphabet (`-_`). Padding may be omitted. */
 export type Base64Url = Brand<string, "Base64Url">;
 
 /** Milliseconds since the Unix epoch, as returned by `Date.now()`. */
@@ -22,6 +24,8 @@ export type EpochMilliseconds = Brand<number, "EpochMilliseconds">;
 export type PerformanceTimestamp = Brand<number, "PerformanceTimestamp">;
 /** A duration in milliseconds. */
 export type Milliseconds = Brand<number, "Milliseconds">;
+/** A duration in minutes. */
+export type Minutes = Brand<number, "Minutes">;
 /** A duration in seconds. */
 export type Seconds = Brand<number, "Seconds">;
 /** A duration in microseconds. */
@@ -50,6 +54,10 @@ export type EncodedUri = Brand<string, "EncodedUri">;
 export type AbsoluteUrl = Brand<string, "AbsoluteUrl">;
 /** Output of `Date#toISOString()`: `YYYY-MM-DDTHH:mm:ss.sssZ`. */
 export type IsoUtcString = Brand<string, "IsoUtcString">;
+/** A string without lone surrogates, as `String#isWellFormed()` checks. */
+export type WellFormedString = Brand<string, "WellFormedString">;
+/** Output of `RegExp.escape()`: a pattern that matches the escaped string literally. */
+export type RegExpSource = Brand<string, "RegExpSource">;
 /** Output of `String#normalize("NFC")`. */
 export type NfcString = Brand<string, "NfcString">;
 /** Output of `String#normalize("NFD")`. */

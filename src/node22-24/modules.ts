@@ -18,6 +18,7 @@ import type {
 	IPv6,
 	Milliseconds,
 	PerformanceTimestamp,
+	SafeInteger,
 	Seconds,
 	Uid,
 } from "../index.ts";
@@ -171,6 +172,9 @@ declare module "os" {
 	function uptime(): Seconds;
 	function totalmem(): Bytes;
 	function freemem(): Bytes;
+	function cpus(): (CpuInfo & {
+		times: { user: Milliseconds; nice: Milliseconds; sys: Milliseconds; idle: Milliseconds; irq: Milliseconds };
+	})[];
 	function userInfo(
 		options?: UserInfoOptionsWithStringEncoding,
 	): UserInfo<string> & { uid: Uid; gid: Gid; homedir: AbsolutePath };
@@ -198,6 +202,9 @@ declare module "crypto" {
 	function hash(algorithm: string, data: BinaryLike, options: "base64"): Base64;
 	function hash(algorithm: string, data: BinaryLike, options: "base64url"): Base64Url;
 	function randomUUID(options?: RandomUUIDOptions): BrandedUUID;
+	// Node requires max - min < 2 ** 48, so the result is always safe.
+	function randomInt(max: number): SafeInteger;
+	function randomInt(min: number, max: number): SafeInteger;
 	namespace webcrypto {
 		interface Crypto {
 			randomUUID(): BrandedUUID;

@@ -66,15 +66,15 @@ Each entry includes the ones below it. Never pick an entry above your `lib`: it 
 
 ## Brands
 
-|                    | Brands                                                                                                | From, for example                                                             |
-| ------------------ | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| 📁 Paths and files | `AbsolutePath`, `FileDescriptor`                                                                      | `path.resolve()`, `process.cwd()`, `fs.openSync()`                            |
-| ⏱️ Time            | `EpochMilliseconds`, `PerformanceTimestamp`, `Milliseconds`, `Seconds`, `Microseconds`, `Nanoseconds` | `Date.now()`, `performance.now()`, `fs.statSync().mtimeMs`                    |
-| 📦 Sizes           | `Bytes`, `Kilobytes`                                                                                  | `fs.statSync().size`, `Buffer.byteLength()`, `process.resourceUsage().maxRSS` |
-| 🔢 Numbers         | `Finite`, `Integer`, `SafeInteger`                                                                    | `Number.isSafeInteger()`                                                      |
-| 🔤 Encodings       | `Hex`, `Base64`, `Json`, `EncodedUriComponent`, `AbsoluteUrl`, `IsoUtcString`, `NfcString`            | `hash.digest("hex")`, `JSON.stringify()`, `date.toISOString()`                |
-| 🪪 Identity        | `UUID`, `Uid`, `Gid`, `AsyncId`                                                                       | `crypto.randomUUID()`, `os.userInfo().uid`                                    |
-| 🌐 Network         | `IPv4`, `IPv6`                                                                                        | `net.isIPv4()`, `dns.promises.resolve4()`                                     |
+|                    | Brands                                                                                           | From, for example                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| 📁 Paths and files | `AbsolutePath`, `FileDescriptor`                                                                 | `path.resolve()`, `process.cwd()`, `fs.openSync()`                            |
+| ⏱️ Time            | `EpochMilliseconds`, `PerformanceTimestamp`, `Milliseconds`, `Seconds`, `Minutes`, `Nanoseconds` | `Date.now()`, `performance.now()`, `fs.statSync().mtimeMs`                    |
+| 📦 Sizes           | `Bytes`, `Kilobytes`                                                                             | `fs.statSync().size`, `Buffer.byteLength()`, `process.resourceUsage().maxRSS` |
+| 🔢 Numbers         | `Finite`, `Integer`, `SafeInteger`                                                               | `Number.isSafeInteger()`, `Math.floor()`, `crypto.randomInt()`                |
+| 🔤 Encodings       | `Hex`, `Base64`, `Json`, `EncodedUriComponent`, `AbsoluteUrl`, `IsoUtcString`, `NfcString`       | `hash.digest("hex")`, `JSON.stringify()`, `date.toISOString()`                |
+| 🪪 Identity        | `UUID`, `Uid`, `Gid`, `AsyncId`                                                                  | `crypto.randomUUID()`, `os.userInfo().uid`                                    |
+| 🌐 Network         | `IPv4`, `IPv6`                                                                                   | `net.isIPv4()`, `dns.promises.resolve4()`                                     |
 
 See **[API.md](API.md)** for every branded API.
 
@@ -91,7 +91,7 @@ Each entry adds overloads to the built-in declarations through declaration mergi
 
 ## Compatibility
 
-- TypeScript 5.9 or later.
+- TypeScript 5.9 or later. The `/es2025` and `/esnext` entries need TypeScript 7.
 - `@types/node` 22.20.5+, 24.19.2+ or 26.6.5+, with the matching entry.
 - Both `fs` and `node:fs` style imports, in ES modules and CommonJS.
 

@@ -47,3 +47,20 @@ if (Number.isFinite(value)) {
 	// @ts-expect-error a Finite number is not necessarily an Integer
 	value satisfies B.Integer;
 }
+
+new Date().getTimezoneOffset() satisfies B.Minutes;
+raw.toWellFormed() satisfies B.WellFormedString;
+if (raw.isWellFormed()) {
+	raw satisfies B.WellFormedString;
+}
+// @ts-expect-error
+raw satisfies B.WellFormedString;
+
+declare const finite: B.Finite;
+declare const num: number;
+Math.floor(finite) satisfies B.Integer;
+Math.ceil(finite) satisfies B.Integer;
+Math.round(finite) satisfies B.Integer;
+Math.trunc(finite) satisfies B.Integer;
+// @ts-expect-error Math.floor(Infinity) is Infinity
+Math.floor(num) satisfies B.Integer;

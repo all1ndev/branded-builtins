@@ -17,6 +17,8 @@ test/root
 for compiler in typescript typescript5; do
 	echo "$compiler $(node "node_modules/$compiler/bin/tsc" -v)"
 	for project in $projects; do
+		# TypeScript 5 has no es2025 lib and no esnext Uint8Array base64 methods.
+		if [ "$compiler" = typescript5 ] && [ "$project" = test/esnext ]; then continue; fi
 		node "node_modules/$compiler/bin/tsc" -p "$project"
 	done
 done
