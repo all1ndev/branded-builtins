@@ -1,0 +1,27 @@
+name: latest
+
+# The lockfile pins the lowest supported versions. This checks the newest ones the peer ranges
+# allow, so a new @types/node or TypeScript release that breaks an overload fails here.
+on:
+    schedule:
+        - cron: "17 6 1 * *"
+    workflow_dispatch:
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 26
+            - run: npm ci
+            - run: >-
+                  npm install --no-save
+                  @types22/node@npm:@types/node@^22
+                  @types24/node@npm:@types/node@^24
+                  @types26/node@npm:@types/node@latest
+                  typescript@latest
+                  typescript5@npm:typescript@^5
+            - run: npm ls @types22/node @types24/node @types26/node typescript typescript5
+            - run: npm test
