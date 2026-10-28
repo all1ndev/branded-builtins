@@ -99,6 +99,12 @@ Each entry adds overloads to the built-in declarations through declaration mergi
 
 New brands ship in minor releases. Stricter types are the point of this package, so code that relied on a plain type may need an annotation after an upgrade (see [Caveats](#caveats)). Renaming or removing an exported brand type is a major release.
 
+## Further reading
+
+- [Branded types in TypeScript](https://all1n.dev/posts/2026-09-25-typescript-branded-types/)
+- [When to use branded types, and when not to](https://all1n.dev/posts/2026-09-25-branded-types-good-bad-use-cases/)
+- [Overloading on a branded type](https://all1n.dev/posts/2026-09-25-overloading-on-a-branded-type/)
+
 ## License
 
 [MIT](LICENSE)
