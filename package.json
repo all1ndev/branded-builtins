@@ -59,7 +59,7 @@
 		"format": "prettier --write --ignore-unknown ."
 	},
 	"peerDependencies": {
-		"@types/node": "^22.20.5 || ^24.19.2 || >=26.6.5",
+		"@types/node": "^22.20.0 || ^24.19.0 || >=26.6.0",
 		"typescript": ">=5.9"
 	},
 	"peerDependenciesMeta": {
@@ -70,9 +70,9 @@
 	"devDependencies": {
 		"@all1ndev/prettier-config": "^2.0.0",
 		"@total-typescript/ts-reset": "^0.6.1",
-		"@types22/node": "npm:@types/node@^22.20.5",
-		"@types24/node": "npm:@types/node@^24.19.2",
-		"@types26/node": "npm:@types/node@^26.6.5",
+		"@types22/node": "npm:@types/node@^22.20.0",
+		"@types24/node": "npm:@types/node@^24.19.0",
+		"@types26/node": "npm:@types/node@^26.6.0",
 		"prettier": "^3.9.10",
 		"typescript": "^7.0.2",
 		"typescript5": "npm:typescript@^5.9.3"

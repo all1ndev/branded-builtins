@@ -93,7 +93,7 @@ Each entry adds overloads to the built-in declarations through declaration mergi
 ## Compatibility
 
 - TypeScript 5.9 or later. The `/es2025` and `/esnext` entries need TypeScript 7.
-- `@types/node` 22.20.5+, 24.19.2+ or 26.6.5+, with the matching entry.
+- `@types/node` 22.20.0+, 24.19.0+ or 26.6.0+, with the matching entry.
 - Both `fs` and `node:fs` style imports, in ES modules and CommonJS.
 
 ## Versioning
