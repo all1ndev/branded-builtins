@@ -7,8 +7,19 @@ crypto.randomUUID() satisfies B.UUID;
 performance.now() satisfies B.PerformanceTimestamp;
 performance.mark("a").startTime satisfies B.PerformanceTimestamp;
 performance.measure("a", "b").duration satisfies B.Milliseconds;
+performance.measure("a", { start: "b" }).startTime satisfies B.PerformanceTimestamp;
+performance.measure("a", { start: performance.now() }).startTime satisfies B.PerformanceTimestamp;
+performance.measure("a", { start: 0 }).duration satisfies B.Milliseconds;
+// @ts-expect-error a plain start time is the caller's number
 performance.measure("a", { start: 0 }).startTime satisfies B.PerformanceTimestamp;
+performance.mark("a", { startTime: performance.now() }).startTime satisfies B.PerformanceTimestamp;
+// @ts-expect-error
+performance.mark("a", { startTime: 0 }).startTime satisfies B.PerformanceTimestamp;
+new URLSearchParams({ a: raw }).toString() satisfies B.FormUrlEncoded;
+// @ts-expect-error
+new URLSearchParams({ a: raw }).toString() satisfies B.EncodedUriComponent;
 btoa(raw) satisfies B.Base64;
+atob(raw) satisfies B.WellFormedString;
 new URL(raw).toString() satisfies B.AbsoluteUrl;
 new URL(raw).toJSON() satisfies B.AbsoluteUrl;
 Date.now() satisfies B.EpochMilliseconds;
@@ -23,6 +34,8 @@ performance.getEntriesByName(raw)[0]?.duration satisfies B.Milliseconds | undefi
 performance.getEntriesByType("mark")[0]?.startTime satisfies B.PerformanceTimestamp | undefined;
 declare const entryList: PerformanceObserverEntryList;
 entryList.getEntries()[0]?.duration satisfies B.Milliseconds | undefined;
+declare const observer: PerformanceObserver;
+observer.takeRecords()[0]?.startTime satisfies B.PerformanceTimestamp | undefined;
 declare const deadline: IdleDeadline;
 deadline.timeRemaining() satisfies B.Milliseconds;
 declare const video: HTMLVideoElement;

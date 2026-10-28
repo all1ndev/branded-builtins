@@ -66,28 +66,29 @@ Each entry includes the ones below it. Never pick an entry above your `lib`: it 
 
 ## Brands
 
-|                    | Brands                                                                                           | From, for example                                                             |
-| ------------------ | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
-| 📁 Paths and files | `AbsolutePath`, `FileDescriptor`                                                                 | `path.resolve()`, `process.cwd()`, `fs.openSync()`                            |
-| ⏱️ Time            | `EpochMilliseconds`, `PerformanceTimestamp`, `Milliseconds`, `Seconds`, `Minutes`, `Nanoseconds` | `Date.now()`, `performance.now()`, `fs.statSync().mtimeMs`                    |
-| 📦 Sizes           | `Bytes`, `Kilobytes`                                                                             | `fs.statSync().size`, `Buffer.byteLength()`, `process.resourceUsage().maxRSS` |
-| 🔢 Numbers         | `Finite`, `Integer`, `SafeInteger`                                                               | `Number.isSafeInteger()`, `Math.floor()`, `crypto.randomInt()`                |
-| 🔤 Encodings       | `Hex`, `Base64`, `Json`, `EncodedUriComponent`, `AbsoluteUrl`, `IsoUtcString`, `NfcString`       | `hash.digest("hex")`, `JSON.stringify()`, `date.toISOString()`                |
-| 🪪 Identity        | `UUID`, `Uid`, `Gid`, `AsyncId`                                                                  | `crypto.randomUUID()`, `os.userInfo().uid`                                    |
-| 🌍 Locales         | `LanguageTag`, `TimeZoneId`                                                                      | `Intl.getCanonicalLocales()`, `Temporal.Now.timeZoneId()`                     |
-| 🌐 Network         | `IPv4`, `IPv6`                                                                                   | `net.isIPv4()`, `dns.promises.resolve4()`                                     |
+|                    | Brands                                                                                            | From, for example                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| 📁 Paths and files | `AbsolutePath`, `FileDescriptor`, `FileMode`                                                      | `path.resolve()`, `process.cwd()`, `fs.openSync()`                            |
+| ⏱️ Time            | `EpochMilliseconds`, `PerformanceTimestamp`, `Milliseconds`, `Seconds`, `Minutes`, `Nanoseconds`  | `Date.now()`, `performance.now()`, `fs.statSync().mtimeMs`                    |
+| 📦 Sizes           | `Bytes`, `Kilobytes`                                                                              | `fs.statSync().size`, `Buffer.byteLength()`, `process.resourceUsage().maxRSS` |
+| 🔢 Numbers         | `Finite`, `Integer`, `SafeInteger`, `Uint32`                                                      | `Number.isSafeInteger()`, `Math.floor()`, `crypto.randomInt()`                |
+| 🔤 Encodings       | `Hex`, `Base64`, `Json`, `EncodedUriComponent`, `AbsoluteUrl`, `IsoUtcString`, `NfcString`, `Pem` | `hash.digest("hex")`, `JSON.stringify()`, `date.toISOString()`                |
+| 🪪 Identity        | `UUID`, `Uid`, `Gid`, `AsyncId`                                                                   | `crypto.randomUUID()`, `os.userInfo().uid`                                    |
+| 🌍 Locales         | `LanguageTag`, `TimeZoneId`                                                                       | `Intl.getCanonicalLocales()`, `Temporal.Now.timeZoneId()`                     |
+| 🌐 Network         | `IPv4`, `IPv6`, `Port`, `Cidr`, `MacAddress`, `HeaderName`                                        | `net.isIPv4()`, `dns.promises.resolve4()`, `server.address().port`            |
 
 See **[API.md](API.md)** for every branded API.
 
 ## How it works
 
-Each entry adds overloads to the built-in declarations through declaration merging. The added overloads take priority over the originals, and every original signature stays, so plain arguments still type-check. Brands are erased at compile time.
+Each entry adds overloads to the built-in declarations through declaration merging. The added overloads take priority over the originals (see [Caveats](#caveats) for one exception), and every original signature stays, so plain arguments still type-check. Brands are erased at compile time.
 
 ## Caveats
 
 - **New brands can break inference.** `let p = path.resolve(x); p = "other"` stops compiling, because `p` is now an `AbsolutePath`.
 - **Arithmetic drops brands.** `performance.now() - start` is a plain `number`.
 - **Brands mark the unit, not validity.** `Date.parse("nope")` is still an `EpochMilliseconds` (`NaN`).
+- **An original overload with a literal parameter wins.** TypeScript tries overloads whose parameters are literal types first, in declaration order, so the original `dns.promises.resolve(host, "SOA")` and `tlsSocket.getPeerCertificate()` stay plain. Their siblings `resolveSoa()` and `getCertificate()` are branded.
 - **Properties can't be branded.** Declaration merging can't change a property's type, so `process.pid`, `import.meta.dirname` and `performance.timeOrigin` stay plain. Fields are branded only on objects an API returns.
 
 ## Compatibility

@@ -17,16 +17,21 @@ All brands are exported from the root entry: `import type { AbsolutePath } from 
 | --------- | ------------------------------------------------------------------- | --------------------------------------------------------------------- |
 | Paths     | `AbsolutePath`                                                      | A path `path.isAbsolute()` accepts                                    |
 | Files     | `FileDescriptor`                                                    | A file descriptor                                                     |
+|           | `FileMode`                                                          | File type and permission bits                                         |
 | Time      | `EpochMilliseconds`                                                 | Milliseconds since the Unix epoch (wall clock)                        |
 |           | `PerformanceTimestamp`                                              | Milliseconds since `performance.timeOrigin` (monotonic clock)         |
 |           | `Minutes`, `Seconds`, `Milliseconds`, `Microseconds`, `Nanoseconds` | Durations                                                             |
 |           | `BigIntNanoseconds`                                                 | A duration in nanoseconds, as a `bigint`                              |
 | Size      | `Bytes`, `Kilobytes`                                                | Amounts of memory or data                                             |
 | Numbers   | `Finite`, `Integer`, `SafeInteger`                                  | Stacked: a `SafeInteger` is also an `Integer`, which is also `Finite` |
+|           | `Uint32`                                                            | An integer from 0 to 2³² − 1, also a `SafeInteger`                    |
 | Encodings | `Hex`, `Base64`, `Base64Url`                                        | Binary data as text                                                   |
 |           | `Json`                                                              | Output of `JSON.stringify`                                            |
 |           | `EncodedUriComponent`, `EncodedUri`                                 | Output of `encodeURIComponent`, `encodeURI`                           |
 |           | `AbsoluteUrl`                                                       | A serialized `URL`                                                    |
+|           | `FormUrlEncoded`                                                    | Output of `URLSearchParams#toString`                                  |
+|           | `Pem`                                                               | PEM-encoded keys or certificates                                      |
+|           | `ColonHexFingerprint`                                               | A certificate fingerprint: `AB:CD:…`                                  |
 |           | `IsoUtcString`                                                      | `YYYY-MM-DDTHH:mm:ss.sssZ`                                            |
 |           | `NfcString`, `NfdString`, `NfkcString`, `NfkdString`                | A Unicode-normalized string                                           |
 |           | `WellFormedString`                                                  | A string without lone surrogates                                      |
@@ -36,9 +41,14 @@ All brands are exported from the root entry: `import type { AbsolutePath } from 
 | Identity  | `UUID`                                                              | A random UUID                                                         |
 |           | `Uid`, `Gid`                                                        | A user or group id                                                    |
 |           | `AsyncId`                                                           | An `async_hooks` id                                                   |
+|           | `Pointer`                                                           | A native memory address from `node:ffi`, as a `bigint`                |
 | Locales   | `LanguageTag`                                                       | A canonical BCP 47 locale identifier                                  |
 |           | `TimeZoneId`                                                        | A time zone `Intl` and Temporal accept                                |
 | Network   | `IPv4`, `IPv6`                                                      | An IP address                                                         |
+|           | `Cidr`                                                              | An IP address with a prefix length                                    |
+|           | `MacAddress`                                                        | `xx:xx:xx:xx:xx:xx`, lowercase                                        |
+|           | `Port`                                                              | A port from 0 to 65535, also a `SafeInteger`                          |
+|           | `HeaderName`, `LowercaseHeaderName`                                 | An HTTP header name; a `LowercaseHeaderName` is also a `HeaderName`   |
 
 ## `es2024`
 
@@ -93,7 +103,7 @@ Needs TypeScript 7.
 | `performance.now()`                                                                                                                                                                         | `PerformanceTimestamp`                 |
 | `performance.mark().startTime`, `performance.measure().startTime`                                                                                                                           | `PerformanceTimestamp`                 |
 | `performance.measure().duration`                                                                                                                                                            | `Milliseconds`                         |
-| `performance.getEntries…()`, `PerformanceObserverEntryList#getEntries…()`: `.startTime`, `.duration`                                                                                        | `PerformanceTimestamp`, `Milliseconds` |
+| `performance.getEntries…()`, `PerformanceObserverEntryList#getEntries…()`, `PerformanceObserver#takeRecords()`: `.startTime`, `.duration`                                                   | `PerformanceTimestamp`, `Milliseconds` |
 | `IdleDeadline#timeRemaining()`                                                                                                                                                              | `Milliseconds`                         |
 | `TimeRanges#start()`, `end()` (`media.buffered`, `.played`, `.seekable`), `SVGAnimationElement#getCurrentTime()`, `getStartTime()`, `getSimpleDuration()`, `SVGSVGElement#getCurrentTime()` | `Seconds`                              |
 | `AudioData#allocationSize()`, `VideoFrame#allocationSize()`, `TextEncoder#encodeInto().written`, `navigator.storage.estimate()`: `.usage`, `.quota`                                         | `Bytes`                                |
@@ -101,7 +111,11 @@ Needs TypeScript 7.
 | `CSS.escape()`                                                                                                                                                                              | `CssIdentifier`                        |
 | `crypto.randomUUID()`                                                                                                                                                                       | `UUID`                                 |
 | `btoa()`                                                                                                                                                                                    | `Base64`                               |
+| `atob()`                                                                                                                                                                                    | `WellFormedString`                     |
 | `URL#toString()`, `URL#toJSON()`, `location.toString()`, `import.meta.resolve()`                                                                                                            | `AbsoluteUrl`                          |
+| `URLSearchParams#toString()`                                                                                                                                                                | `FormUrlEncoded`                       |
+
+`mark()` and `measure()` keep `startTime` branded only when a start time you pass is a `PerformanceTimestamp` (or a mark name). Given a plain number, `startTime` is that number, so only `measure().duration` stays branded.
 
 ## `node22`, `node24`, `node26`
 
@@ -114,57 +128,104 @@ The same overloads for each Node version, except where noted. Both import names 
 | `path.resolve()`, `process.cwd()`, `os.homedir()`, `os.tmpdir()`, `os.userInfo().homedir`                   | `AbsolutePath`                  |
 | `url.fileURLToPath()`, `module.findPackageJSON()`, `module.getCompileCacheDir()`, `require.resolve.paths()` | `AbsolutePath`                  |
 | `fs.realpathSync()`, `fs.realpathSync.native()`, `fs/promises.realpath()`                                   | `AbsolutePath`                  |
+| `sqlite` `DatabaseSync#location()`                                                                          | `AbsolutePath \| null`          |
 | `path.isAbsolute(p)`                                                                                        | Type guard: `p is AbsolutePath` |
 
 Given an `AbsolutePath`, these keep the brand: `path.join()`, `path.normalize()`, `path.dirname()`, `path.toNamespacedPath()`, `path.parse().dir` and `.root`, `fs.mkdtempSync()`, `fs.mkdirSync(…, { recursive: true })`, `fs/promises.mkdtemp()`, `fs/promises.mkdir(…, { recursive: true })`, and in `node24`+ `fs.mkdtempDisposableSync().path` and `fs/promises.mkdtempDisposable().path`. `path.posix` and `path.win32` get the same overloads.
 
+The fs path APIs are branded only with no encoding or a text one (`"utf8"`, `"latin1"`, `"ascii"`): `realpathSync(p, "hex")` is a hex string, not a path.
+
 ### Files
 
-| API                                                                                                 | Returns             |
-| --------------------------------------------------------------------------------------------------- | ------------------- |
-| `fs.openSync()`, `fs/promises.open().fd`                                                            | `FileDescriptor`    |
-| `fs.readSync()`, `fs.writeSync()`, `FileHandle#read().bytesRead`, `FileHandle#write().bytesWritten` | `Bytes`             |
-| `fs.statSync()`, `fs.lstatSync()`, `fs/promises.stat()`, `lstat()`, `FileHandle#stat()`: `.size`    | `Bytes`             |
-| The same stats: `.atimeMs`, `.mtimeMs`, `.ctimeMs`, `.birthtimeMs`                                  | `EpochMilliseconds` |
+| API                                                                                                                                  | Returns                  |
+| ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------ |
+| `fs.openSync()`, `fs/promises.open().fd`                                                                                             | `FileDescriptor`         |
+| `fs.readSync()`, `fs.writeSync()`, `fs.readvSync()`, `fs.writevSync()`                                                               | `Bytes`                  |
+| `FileHandle#read().bytesRead`, `FileHandle#write().bytesWritten`, `FileHandle#readv().bytesRead`, `FileHandle#writev().bytesWritten` | `Bytes`                  |
+| `fs.statSync()`, `fs.lstatSync()`, `fs.fstatSync()`, `fs/promises.stat()`, `lstat()`, `FileHandle#stat()`: `.size`, `.blksize`       | `Bytes`                  |
+| The same stats: `.atimeMs`, `.mtimeMs`, `.ctimeMs`, `.birthtimeMs`                                                                   | `EpochMilliseconds`      |
+| The same stats: `.mode`, `.uid`, `.gid`                                                                                              | `FileMode`, `Uid`, `Gid` |
+| `fs.statfsSync()`, `fs/promises.statfs()`: `.bsize`, and `.frsize` in `node24`+                                                      | `Bytes`                  |
+| `fs.openAsBlob().size`, `buffer.resolveObjectURL().size`                                                                             | `Bytes`                  |
+| `process.umask()`                                                                                                                    | `FileMode`               |
 
 Stats with `bigint: true` stay unbranded.
 
+### Text and encodings
+
+| API                                                                                                                                                                                                                              | Returns                                          |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `Buffer#toString("hex" \| "base64" \| "base64url")`                                                                                                                                                                              | `Hex`, `Base64`, `Base64Url`                     |
+| `Buffer#toString()`, and with `"utf8"`, `"latin1"`, `"binary"` or `"ascii"`                                                                                                                                                      | `WellFormedString`                               |
+| `fs.readFileSync()`, `fs/promises.readFile()`, `FileHandle#readFile()` with one of those encodings                                                                                                                               | `Hex`, `Base64`, `Base64Url`, `WellFormedString` |
+| `Hash#digest(…)`, `Hmac#digest(…)`, `crypto.hash(…)` with the same encodings                                                                                                                                                     | `Hex`, `Base64`, `Base64Url`                     |
+| `Sign#sign(…)`, `Cipheriv#update(…)`, `#final(…)`, `Decipheriv#update(…)`, `#final(…)`, and the `ECDH` and `DiffieHellman` key getters, `generateKeys()` and `computeSecret()`, with `"hex"`, `"base64"` or `"base64url"` output | `Hex`, `Base64`, `Base64Url`                     |
+| `KeyObject#export({ format: "pem" })`, `X509Certificate#toString()`, `#toJSON()`, `tls.getCACertificates()`                                                                                                                      | `Pem`, `Pem[]`                                   |
+| `KeyObject#export({ format: "jwk" })`: `.k`, `.n`, `.e`, `.d`, `.p`, `.q`, `.dp`, `.dq`, `.qi`, `.x`, `.y`                                                                                                                       | `Base64Url`                                      |
+| `X509Certificate#toLegacyObject()`, `TLSSocket#getCertificate()`: `.fingerprint`, `.fingerprint256`, `.fingerprint512`                                                                                                           | `ColonHexFingerprint`                            |
+| `TextDecoder#decode()`, `util.toUSVString()`, `Blob#text()`, `fetch()` responses' `text()`, `Request#text()`, and in `node24`+ `Blob#textStream()` chunks                                                                        | `WellFormedString`                               |
+| `btoa()`                                                                                                                                                                                                                         | `Base64`                                         |
+| `atob()`                                                                                                                                                                                                                         | `WellFormedString`                               |
+| `URL#toString()`, `URL#toJSON()`, `url.format(url)` without options, `import.meta.resolve()`                                                                                                                                     | `AbsoluteUrl`                                    |
+| `URLSearchParams#toString()`                                                                                                                                                                                                     | `FormUrlEncoded`                                 |
+| `CPUProfileHandle#stop()` (`Worker#startCpuProfile()`), and in `node24`+ `v8.startCpuProfile().stop()`, `HeapProfileHandle#stop()`, in `node26` `v8.startHeapProfile().stop()`                                                   | `Json`                                           |
+
+`utf16le` and `ucs2` can decode to lone surrogates, so those stay plain. `new Response(…)` in Node is undici's class, whose `text` is a property, so only responses typed as the global `Response`, like `fetch()`'s, are branded.
+
 ### Time and resources
 
-| API                                                                                                                                                                                                                | Returns                |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------- |
-| `perf_hooks` `performance.now()`, `.mark().startTime`, `.measure().startTime`                                                                                                                                      | `PerformanceTimestamp` |
-| `perf_hooks` `performance.measure().duration`                                                                                                                                                                      | `Milliseconds`         |
-| `process.uptime()`, `os.uptime()`, `process.hrtime()[0]`                                                                                                                                                           | `Seconds`              |
-| `process.hrtime.bigint()`                                                                                                                                                                                          | `BigIntNanoseconds`    |
-| `os.cpus()[i].times` fields                                                                                                                                                                                        | `Milliseconds`         |
-| `process.cpuUsage().user` / `.system`, `process.resourceUsage().userCPUTime` / `.systemCPUTime`                                                                                                                    | `Microseconds`         |
-| `monitorEventLoopDelay()`: `.min`, `.max`, `.mean`, `.stddev`, `.percentile()`                                                                                                                                     | `Nanoseconds`          |
-| `monitorEventLoopDelay()`: `.minBigInt`, `.percentileBigInt()`                                                                                                                                                     | `BigIntNanoseconds`    |
-| `os.totalmem()`, `os.freemem()`, `Buffer.byteLength()`, `process.memoryUsage()` fields, `process.memoryUsage.rss()`, `process.availableMemory()`, `process.constrainedMemory()`, `Buffer#write()`, `Buffer#copy()` | `Bytes`                |
-| `process.resourceUsage().maxRSS`                                                                                                                                                                                   | `Kilobytes`            |
+| API                                                                                                                                                                                                                | Returns                                |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------- |
+| `perf_hooks` `performance.now()`, `.mark().startTime`, `.measure().startTime`                                                                                                                                      | `PerformanceTimestamp`                 |
+| `perf_hooks` `performance.measure().duration`                                                                                                                                                                      | `Milliseconds`                         |
+| `perf_hooks` `performance.getEntries…()`, `PerformanceObserverEntryList#getEntries…()`, `PerformanceObserver#takeRecords()`: `.startTime`, `.duration`                                                             | `PerformanceTimestamp`, `Milliseconds` |
+| The same with `"resource"`: `.transferSize`, `.encodedBodySize`, `.decodedBodySize`                                                                                                                                | `Bytes`                                |
+| `perf_hooks.eventLoopUtilization()`, `performance.eventLoopUtilization()`: `.idle`, `.active` (`node24`+)                                                                                                          | `Milliseconds`                         |
+| `process.uptime()`, `os.uptime()`, `process.hrtime()[0]`                                                                                                                                                           | `Seconds`                              |
+| `process.hrtime()[1]`                                                                                                                                                                                              | `Nanoseconds`                          |
+| `process.hrtime.bigint()`                                                                                                                                                                                          | `BigIntNanoseconds`                    |
+| `os.cpus()[i].times` fields, `net.getDefaultAutoSelectFamilyAttemptTimeout()`                                                                                                                                      | `Milliseconds`                         |
+| `process.cpuUsage()`, `process.threadCpuUsage()`, `Worker#cpuUsage()`: `.user` / `.system`, `process.resourceUsage().userCPUTime` / `.systemCPUTime`                                                               | `Microseconds`                         |
+| `v8.GCProfiler#stop()`: `.startTime`, `.endTime`                                                                                                                                                                   | `EpochMilliseconds`                    |
+| `monitorEventLoopDelay()`: `.min`, `.max`, `.mean`, `.stddev`, `.percentile()`                                                                                                                                     | `Nanoseconds`                          |
+| `monitorEventLoopDelay()`: `.minBigInt`, `.percentileBigInt()`                                                                                                                                                     | `BigIntNanoseconds`                    |
+| `os.totalmem()`, `os.freemem()`, `Buffer.byteLength()`, `process.memoryUsage()` fields, `process.memoryUsage.rss()`, `process.availableMemory()`, `process.constrainedMemory()`, `Buffer#write()`, `Buffer#copy()` | `Bytes`                                |
+| `v8.getHeapStatistics()`, `getHeapSpaceStatistics()`, `getHeapCodeStatistics()`, `Worker#getHeapStatistics()`, `GCProfiler#stop()` heap statistics: size fields                                                    | `Bytes`                                |
+| `vm.measureMemory().total`, `crypto.getCipherInfo()` key, IV and block lengths, `crypto.secureHeapUsed()` `.total`, `.min`, `.used`                                                                                | `Bytes`                                |
+| `dgram.Socket#getRecvBufferSize()`, `getSendBufferSize()`, `getSendQueueSize()`, `http2.getDefaultSettings()` and `getUnpackedSettings()` size settings                                                            | `Bytes`                                |
+| `process.resourceUsage().maxRSS`                                                                                                                                                                                   | `Kilobytes`                            |
 
-### Encodings and identity
+`mark()` and `measure()` keep `startTime` branded only when a start time you pass is a `PerformanceTimestamp` (or a mark name), as in `dom`.
 
-| API                                                                                                                            | Returns                      |
-| ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------- |
-| `Buffer#toString("hex" \| "base64" \| "base64url")`                                                                            | `Hex`, `Base64`, `Base64Url` |
-| `Hash#digest(…)`, `Hmac#digest(…)`, `crypto.hash(…)` with the same encodings                                                   | `Hex`, `Base64`, `Base64Url` |
-| `btoa()`                                                                                                                       | `Base64`                     |
-| `crypto.randomUUID()`, `crypto.webcrypto.randomUUID()`, global `crypto.randomUUID()`, and in `node24`+ `crypto.randomUUIDv7()` | `UUID`                       |
-| `crypto.randomInt()`                                                                                                           | `SafeInteger`                |
-| `os.userInfo().uid` / `.gid`                                                                                                   | `Uid`, `Gid`                 |
-| `async_hooks.executionAsyncId()`, `triggerAsyncId()`, `AsyncResource#asyncId()`, `AsyncResource#triggerAsyncId()`              | `AsyncId`                    |
-| `URL#toString()`, `URL#toJSON()`                                                                                               | `AbsoluteUrl`                |
+### Numbers and identity
+
+| API                                                                                                                                                   | Returns             |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `crypto.randomInt()`, `os.availableParallelism()`, `Buffer#readInt…()` / `readUInt…()`                                                                | `SafeInteger`       |
+| `zlib.crc32()`, `v8.cachedDataVersionTag()`, `node26` `ffi.getUint32()`                                                                               | `Uint32`            |
+| `sqlite` `StatementSync#run()` and in `node24`+ `SQLTagStore#run()`: `.changes`, `.lastInsertRowid`                                                   | `Integer \| bigint` |
+| `tty.WriteStream#getWindowSize()`, `readline.Interface#getCursorPos()`, `node:test` `callCount()`, `accessCount()`, the `number_of_…` heap statistics | `Integer`           |
+| `crypto.randomUUID()`, `crypto.webcrypto.randomUUID()`, global `crypto.randomUUID()`, and in `node24`+ `crypto.randomUUIDv7()`                        | `UUID`              |
+| `os.userInfo().uid` / `.gid`                                                                                                                          | `Uid`, `Gid`        |
+| `async_hooks.executionAsyncId()`, `triggerAsyncId()`, `AsyncResource#asyncId()`, `AsyncResource#triggerAsyncId()`, `Timeout[Symbol.toPrimitive]()`    | `AsyncId`           |
+| `node26` `ffi.dlsym()`, `DynamicLibrary#getSymbol()`, `getSymbols()`, `registerCallback()`, `ffi.getRawPointer()`, `getCurrentEventLoop()`            | `Pointer`           |
 
 ### Network
 
-| API                                                                                          | Returns                               |
-| -------------------------------------------------------------------------------------------- | ------------------------------------- |
-| `net.isIPv4(s)`, `net.isIPv6(s)`                                                             | Type guards: `s is IPv4`, `s is IPv6` |
-| `dns/promises.resolve4()`, `resolve6()`, `resolve(…, "A" \| "AAAA")`, and `Resolver` methods | `IPv4[]`, `IPv6[]`                    |
-| `dns/promises.resolve4/6(…, { ttl: true })[i].address`                                       | `IPv4`, `IPv6`                        |
-| `dns/promises.lookup().address`                                                              | `IPv4 \| IPv6`                        |
-| `os.networkInterfaces()[name][i].address`                                                    | `IPv4` or `IPv6`, by `family`         |
-| `net.Server#address()`, `net.Socket#address()`, `dgram.Socket#address()`: `.address`         | `IPv4 \| IPv6`                        |
-| `X509Certificate#checkIP()`                                                                  | `IPv4 \| IPv6 \| undefined`           |
+| API                                                                                                                                                                                                    | Returns                               |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------- |
+| `net.isIPv4(s)`, `net.isIPv6(s)`                                                                                                                                                                       | Type guards: `s is IPv4`, `s is IPv6` |
+| `dns/promises.resolve4()`, `resolve6()`, `resolve(…, "A" \| "AAAA")`, and `Resolver` methods                                                                                                           | `IPv4[]`, `IPv6[]`                    |
+| `dns/promises.resolve4/6(…, { ttl: true })[i]`: `.address`, `.ttl`                                                                                                                                     | `IPv4`, `IPv6`, `Seconds`             |
+| `dns/promises.resolveSoa()`: `.refresh`, `.retry`, `.expire`, `.minttl`                                                                                                                                | `Seconds`                             |
+| `dns/promises.resolveSrv()[i].port`                                                                                                                                                                    | `Port`                                |
+| `dns/promises.lookup().address`                                                                                                                                                                        | `IPv4 \| IPv6`                        |
+| `os.networkInterfaces()[name][i]`: `.address`, `.netmask`                                                                                                                                              | `IPv4` or `IPv6`, by `family`         |
+| `os.networkInterfaces()[name][i]`: `.mac`, `.cidr`                                                                                                                                                     | `MacAddress`, `Cidr \| null`          |
+| `net.Server#address()`, `net.Socket#address()`, `dgram.Socket#address()`, `dgram.Socket#remoteAddress()`, and in `node24`+ `net.BoundSocket#address()`, `dgram.Socket#bindSync()`: `.address`, `.port` | `IPv4 \| IPv6`, `Port`                |
+| `X509Certificate#checkIP()`                                                                                                                                                                            | `IPv4 \| IPv6 \| undefined`           |
+| `OutgoingMessage#getHeaderNames()` (`ServerResponse`, `ClientRequest`), `Http2ServerResponse#getHeaderNames()`                                                                                         | `LowercaseHeaderName[]`               |
+| `ClientRequest#getRawHeaderNames()`                                                                                                                                                                    | `HeaderName[]`                        |
+| `http.validateHeaderName(name)`                                                                                                                                                                        | Assertion: `name is HeaderName`       |
+
+`dns/promises.resolve(…, "SOA" \| "SRV")` and `TLSSocket#getPeerCertificate()` stay plain: their original overloads have literal parameters, which TypeScript always tries first. In `node26`, `node:vfs` methods are picked from `node:fs`, so they inherit its brands: `vfs.openSync()` returns a `FileDescriptor` that only that virtual file system accepts.

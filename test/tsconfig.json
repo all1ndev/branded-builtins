@@ -4,5 +4,12 @@
 		"typeRoots": ["../node_modules/@types26"],
 		"lib": ["es2024"]
 	},
-	"include": ["index.mts", "specifiers.mts", "node24.mts", "../dist/node26/index.d.ts", "../dist/es2024/index.d.ts"]
+	"include": [
+		"index.mts",
+		"specifiers.mts",
+		"node26.mts",
+		"node24.mts",
+		"../dist/node26/index.d.ts",
+		"../dist/es2024/index.d.ts"
+	]
 }

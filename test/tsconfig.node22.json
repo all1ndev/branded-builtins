@@ -3,5 +3,5 @@
 	"compilerOptions": {
 		"typeRoots": ["../node_modules/@types22"]
 	},
-	"include": ["index.mts", "specifiers.mts", "../dist/node22/index.d.ts", "../dist/es2024/index.d.ts"]
+	"include": ["index.mts", "specifiers.mts", "node22.mts", "../dist/node22/index.d.ts", "../dist/es2024/index.d.ts"]
 }

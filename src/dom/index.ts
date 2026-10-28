@@ -19,15 +19,26 @@ type BrandedPerformanceEntry = PerformanceEntry & {
 
 declare global {
 	interface Performance {
+		// A caller-supplied start time keeps the brand only if it already has it.
 		mark(
 			markName: string,
-			markOptions?: PerformanceMarkOptions,
+			markOptions?: PerformanceMarkOptions & { startTime?: PerformanceTimestamp | undefined },
 		): PerformanceMark & { readonly startTime: PerformanceTimestamp };
+		measure(
+			measureName: string,
+			startOrMeasureOptions?:
+				| string
+				| (PerformanceMeasureOptions & {
+						start?: string | PerformanceTimestamp | undefined;
+						end?: string | PerformanceTimestamp | undefined;
+				  }),
+			endMark?: string,
+		): PerformanceMeasure & { readonly startTime: PerformanceTimestamp; readonly duration: Milliseconds };
 		measure(
 			measureName: string,
 			startOrMeasureOptions?: string | PerformanceMeasureOptions,
 			endMark?: string,
-		): PerformanceMeasure & { readonly startTime: PerformanceTimestamp; readonly duration: Milliseconds };
+		): PerformanceMeasure & { readonly duration: Milliseconds };
 		getEntries(): BrandedPerformanceEntry[];
 		getEntriesByName(name: string, type?: string): BrandedPerformanceEntry[];
 		getEntriesByType(type: string): BrandedPerformanceEntry[];
@@ -36,6 +47,9 @@ declare global {
 		getEntries(): BrandedPerformanceEntry[];
 		getEntriesByName(name: string, type?: string): BrandedPerformanceEntry[];
 		getEntriesByType(type: string): BrandedPerformanceEntry[];
+	}
+	interface PerformanceObserver {
+		takeRecords(): BrandedPerformanceEntry[];
 	}
 	interface IdleDeadline {
 		timeRemaining(): Milliseconds;

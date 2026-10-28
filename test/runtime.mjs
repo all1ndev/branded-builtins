@@ -1,12 +1,21 @@
 // Checks at runtime the facts the brands claim. Types alone can't prove these.
 import assert from "node:assert/strict";
-import { randomInt } from "node:crypto";
+import { executionAsyncId } from "node:async_hooks";
+import crypto, { randomInt } from "node:crypto";
 import fs from "node:fs";
+import http from "node:http";
+import http2 from "node:http2";
 import { createRequire, findPackageJSON } from "node:module";
+import net from "node:net";
 import os from "node:os";
 import path from "node:path";
-import { monitorEventLoopDelay } from "node:perf_hooks";
-import { fileURLToPath } from "node:url";
+import { monitorEventLoopDelay, performance } from "node:perf_hooks";
+import { DatabaseSync } from "node:sqlite";
+import tls from "node:tls";
+import url, { fileURLToPath } from "node:url";
+import util from "node:util";
+import v8 from "node:v8";
+import zlib from "node:zlib";
 
 // AbsolutePath: overloads that keep the brand, under both POSIX and Windows rules.
 const samples = {
@@ -107,4 +116,75 @@ await new Promise((resolve) => setTimeout(resolve, 100));
 delays.disable();
 assert.ok(delays.min > 1e6, `event loop delays are nanoseconds: ${delays.min}`);
 
-console.log("runtime checks passed");
+// Encodings that keep a path a path, and text without lone surrogates.
+for (const encoding of ["utf8", "latin1", "ascii"]) assert.ok(path.isAbsolute(fs.realpathSync(".", encoding)));
+const loneSurrogate = Buffer.from([0xed, 0xa0, 0x80, 0xff]);
+for (const encoding of [undefined, "utf8", "latin1", "binary", "ascii"]) {
+	assert.ok(loneSurrogate.toString(encoding).isWellFormed(), `Buffer#toString(${encoding})`);
+}
+assert.ok(!Buffer.from([0x00, 0xd8]).toString("utf16le").isWellFormed(), "utf16le can give lone surrogates");
+assert.ok(util.toUSVString("a\ud800").isWellFormed());
+assert.ok(atob("7aCA/w==").isWellFormed(), "atob gives code units up to 0xFF");
+assert.match(fs.readFileSync(import.meta.filename, "hex"), /^[0-9a-f]+$/);
+
+// crypto output formats.
+const ecdh = crypto.createECDH("prime256v1");
+assert.match(ecdh.generateKeys("hex"), /^[0-9a-f]+$/);
+const cipher = crypto.createCipheriv("aes-128-cbc", Buffer.alloc(16), Buffer.alloc(16));
+for (const chunk of [cipher.update("a".repeat(37), "utf8", "base64"), cipher.final("base64")]) {
+	assert.equal(Buffer.from(chunk, "base64").toString("base64"), chunk, "cipher chunks are whole base64");
+}
+const [caCertificate] = tls.getCACertificates();
+const x509 = new crypto.X509Certificate(caCertificate);
+assert.match(caCertificate, /^-----BEGIN CERTIFICATE-----\n/);
+assert.equal(x509.toJSON(), x509.toString());
+assert.match(x509.toString(), /^-----BEGIN CERTIFICATE-----\n/);
+assert.match(x509.toLegacyObject().fingerprint256, /^[0-9A-F]{2}(:[0-9A-F]{2})+$/);
+const { publicKey } = crypto.generateKeyPairSync("ec", { namedCurve: "P-256" });
+assert.match(publicKey.export({ type: "spki", format: "pem" }), /^-----BEGIN PUBLIC KEY-----\n/);
+assert.match(publicKey.export({ format: "jwk" }).x, /^[A-Za-z0-9_-]+$/);
+assert.equal(crypto.getCipherInfo("aes-256-cbc").keyLength, 32, "getCipherInfo lengths are bytes");
+assert.ok(Number.isInteger(zlib.crc32("a")) && zlib.crc32("\xff".repeat(9)) < 2 ** 32);
+assert.ok(v8.cachedDataVersionTag() >= 0 && v8.cachedDataVersionTag() < 2 ** 32);
+
+// Network formats.
+for (const info of Object.values(os.networkInterfaces()).flat()) {
+	assert.equal(net.isIP(info.netmask), info.family === "IPv4" ? 4 : 6, info.netmask);
+	assert.match(info.mac, /^[0-9a-f]{2}(:[0-9a-f]{2}){5}$/);
+	if (info.cidr !== null) assert.match(info.cidr, /^[0-9a-f.:]+\/\d+$/);
+}
+assert.equal(new URLSearchParams({ a: "b c" }).toString(), "a=b+c");
+assert.ok(URL.canParse(import.meta.resolve("node:fs")) && URL.canParse(import.meta.resolve("./x.mjs")));
+const unicodeUrl = new URL("https://例え.jp/a b");
+assert.equal(url.format(unicodeUrl), unicodeUrl.href);
+const response = new http.ServerResponse(new http.IncomingMessage(null));
+response.setHeader("X-Mixed-Case", "1");
+assert.deepEqual(response.getHeaderNames(), ["x-mixed-case"]);
+assert.throws(() => http.validateHeaderName("bad name"));
+assert.equal(http2.getDefaultSettings().maxFrameSize, 16384, "http2 settings are octets");
+
+// More units.
+assert.ok(process.hrtime()[1] < 1e9);
+if (process.threadCpuUsage) assert.ok(process.threadCpuUsage().user > 1000, "threadCpuUsage is microseconds");
+assert.ok(v8.getHeapStatistics().used_heap_size > 1e6, "heap statistics are bytes");
+assert.ok(fs.statSync(".").blksize >= 512, "blksize is bytes");
+assert.equal(process.umask(), process.umask(), "umask() returns the mask");
+const gcProfiler = new v8.GCProfiler();
+gcProfiler.start();
+const gcResult = gcProfiler.stop();
+assert.ok(Math.abs(gcResult.startTime - Date.now()) < 60_000, "GCProfiler times are epoch milliseconds");
+if (v8.startCpuProfile) JSON.parse(v8.startCpuProfile().stop());
+const elu = performance.eventLoopUtilization();
+assert.ok(elu.idle + elu.active <= performance.now() + 1, "eventLoopUtilization is milliseconds");
+if (DatabaseSync.prototype.location) {
+	const tmpDb = path.join(tmp, `branded-${process.pid}.db`);
+	const db = new DatabaseSync(tmpDb);
+	assert.ok(path.isAbsolute(db.location()));
+	assert.equal(new DatabaseSync(":memory:").location(), null);
+	db.close();
+	fs.rmSync(tmpDb);
+}
+const timeout = setTimeout(() => {
+	assert.equal(+timeout, executionAsyncId(), "a Timeout converts to its async id");
+	console.log("runtime checks passed");
+}, 1);

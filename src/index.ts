@@ -11,6 +11,8 @@ type Brand<T, B extends string> = T & { readonly [brand]: { readonly [K in B]: t
 export type AbsolutePath = Brand<string, "AbsolutePath">;
 /** A file descriptor returned by `fs.openSync()`. */
 export type FileDescriptor = Brand<number, "FileDescriptor">;
+/** File type and permission bits, as in `Stats#mode` and `process.umask()`. */
+export type FileMode = Brand<number, "FileMode">;
 
 export type Hex = Brand<string, "Hex">;
 /** Base64 with the standard alphabet (`+/`). Padding may be omitted. */
@@ -40,6 +42,22 @@ export type Kilobytes = Brand<number, "Kilobytes">;
 export type UUID = Brand<`${string}-${string}-${string}-${string}-${string}`, "UUID">;
 export type IPv4 = Brand<string, "IPv4">;
 export type IPv6 = Brand<string, "IPv6">;
+/** An IP address with a prefix length: `192.168.1.10/24`, `fe80::1/64`. */
+export type Cidr = Brand<string, "Cidr">;
+/** A MAC address as six lowercase hex pairs joined by colons: `00:1a:2b:3c:4d:5e`. */
+export type MacAddress = Brand<string, "MacAddress">;
+/** A TCP or UDP port: an integer from 0 to 65535. */
+export type Port = Brand<number, "Finite" | "Integer" | "SafeInteger" | "Port">;
+/** An HTTP header name: a token as RFC 9110 defines it. */
+export type HeaderName = Brand<string, "HeaderName">;
+/** An HTTP header name in lowercase. */
+export type LowercaseHeaderName = Brand<string, "HeaderName" | "LowercaseHeaderName">;
+/** PEM-encoded data: one or more `-----BEGIN …-----` blocks. */
+export type Pem = Brand<string, "Pem">;
+/** A certificate fingerprint as uppercase hex pairs joined by colons: `AB:CD:…`. */
+export type ColonHexFingerprint = Brand<string, "ColonHexFingerprint">;
+/** A native memory address, as `node:ffi` returns. */
+export type Pointer = Brand<bigint, "Pointer">;
 export type AsyncId = Brand<number, "AsyncId">;
 export type Uid = Brand<number, "Uid">;
 export type Gid = Brand<number, "Gid">;
@@ -50,6 +68,8 @@ export type Json = Brand<string, "Json">;
 export type EncodedUriComponent = Brand<string, "EncodedUriComponent">;
 /** Output of `encodeURI()`. */
 export type EncodedUri = Brand<string, "EncodedUri">;
+/** Output of `URLSearchParams#toString()`: `application/x-www-form-urlencoded`, without a leading `?`. */
+export type FormUrlEncoded = Brand<string, "FormUrlEncoded">;
 /** The serialized form of a `URL` object. */
 export type AbsoluteUrl = Brand<string, "AbsoluteUrl">;
 /** Output of `Date#toISOString()`: `YYYY-MM-DDTHH:mm:ss.sssZ`. */
@@ -81,3 +101,5 @@ export type Finite = Brand<number, "Finite">;
 export type Integer = Brand<number, "Finite" | "Integer">;
 /** An integer between `Number.MIN_SAFE_INTEGER` and `Number.MAX_SAFE_INTEGER`. */
 export type SafeInteger = Brand<number, "Finite" | "Integer" | "SafeInteger">;
+/** An integer from 0 to 2³² − 1. */
+export type Uint32 = Brand<number, "Finite" | "Integer" | "SafeInteger" | "Uint32">;
