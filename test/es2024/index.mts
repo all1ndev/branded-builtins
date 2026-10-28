@@ -64,3 +64,46 @@ Math.round(finite) satisfies B.Integer;
 Math.trunc(finite) satisfies B.Integer;
 // @ts-expect-error Math.floor(Infinity) is Infinity
 Math.floor(num) satisfies B.Integer;
+
+declare const date: Date;
+date.toUTCString() satisfies B.HttpDate;
+date.setTime(0) satisfies B.EpochMilliseconds;
+date.setMilliseconds(0) satisfies B.EpochMilliseconds;
+date.setUTCMilliseconds(0) satisfies B.EpochMilliseconds;
+date.setSeconds(0, 0) satisfies B.EpochMilliseconds;
+date.setUTCSeconds(0) satisfies B.EpochMilliseconds;
+date.setMinutes(0) satisfies B.EpochMilliseconds;
+date.setUTCMinutes(0, 0, 0) satisfies B.EpochMilliseconds;
+date.setHours(0) satisfies B.EpochMilliseconds;
+date.setUTCHours(0, 0, 0, 0) satisfies B.EpochMilliseconds;
+date.setDate(1) satisfies B.EpochMilliseconds;
+date.setUTCDate(1) satisfies B.EpochMilliseconds;
+date.setMonth(0) satisfies B.EpochMilliseconds;
+date.setUTCMonth(0, 1) satisfies B.EpochMilliseconds;
+date.setFullYear(2026) satisfies B.EpochMilliseconds;
+date.setUTCFullYear(2026, 0, 1) satisfies B.EpochMilliseconds;
+// @ts-expect-error
+date.toString() satisfies B.HttpDate;
+
+Math.clz32(num) satisfies B.SafeInteger;
+Math.imul(num, num) satisfies B.SafeInteger;
+declare const view: DataView;
+view.getInt8(0) satisfies B.SafeInteger;
+view.getInt16(0) satisfies B.SafeInteger;
+view.getInt32(0, true) satisfies B.SafeInteger;
+view.getUint8(0) satisfies B.SafeInteger;
+view.getUint16(0, true) satisfies B.SafeInteger;
+view.getUint32(0) satisfies B.SafeInteger;
+// @ts-expect-error getFloat64 can return NaN
+view.getFloat64(0) satisfies B.Finite;
+
+Intl.getCanonicalLocales(raw) satisfies B.LanguageTag[];
+Intl.getCanonicalLocales() satisfies B.LanguageTag[];
+new Intl.Locale(raw).toString() satisfies B.LanguageTag;
+// @ts-expect-error
+raw satisfies B.LanguageTag;
+Intl.supportedValuesOf("timeZone") satisfies B.TimeZoneId[];
+new Intl.DateTimeFormat().resolvedOptions().timeZone satisfies B.TimeZoneId;
+new Intl.DateTimeFormat().resolvedOptions().locale satisfies string;
+// @ts-expect-error
+Intl.supportedValuesOf("currency") satisfies B.TimeZoneId[];

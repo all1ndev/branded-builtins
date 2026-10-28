@@ -61,6 +61,21 @@ assert.throws(() => new Date(NaN).toISOString(), RangeError);
 assert.equal("e\u0301".normalize(), "e\u0301".normalize("NFC"));
 assert.ok("a\ud800".toWellFormed().isWellFormed());
 assert.ok(Math.abs(new Date().getTimezoneOffset()) <= 14 * 60, "getTimezoneOffset is minutes");
+assert.equal(new Date(0).setUTCHours(1), 3_600_000, "Date setters return epoch milliseconds");
+assert.match(new Date(0).toUTCString(), /^[A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} GMT$/);
+assert.ok(Number.isSafeInteger(Math.clz32(NaN)) && Number.isSafeInteger(Math.imul(NaN, 1.5)));
+assert.deepEqual(Intl.getCanonicalLocales("EN-latn-us"), ["en-Latn-US"]);
+assert.equal(new Intl.Locale("EN-us").toString(), "en-US");
+for (const timeZone of [...Intl.supportedValuesOf("timeZone"), new Intl.DateTimeFormat().resolvedOptions().timeZone]) {
+	new Intl.DateTimeFormat("en", { timeZone });
+}
+// Decoders never produce lone surrogates: bytes of an encoded U+D800, and a lone UTF-16 surrogate.
+const surrogate = new Uint8Array([0xed, 0xa0, 0x80]);
+assert.ok(new TextDecoder().decode(surrogate).isWellFormed());
+assert.ok(new TextDecoder("utf-16le").decode(new Uint8Array([0x00, 0xd8])).isWellFormed());
+assert.ok((await new Blob([surrogate]).text()).isWellFormed());
+assert.ok((await new Response(surrogate).text()).isWellFormed());
+assert.equal(new TextEncoder().encodeInto("é", new Uint8Array(4)).written, 2, "encodeInto().written is bytes");
 // es2025 and esnext, on Node versions that have them.
 if (RegExp.escape) assert.ok(new RegExp(RegExp.escape("a.b")).test("a.b"));
 if (Uint8Array.prototype.toBase64) {

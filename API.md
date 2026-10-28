@@ -31,31 +31,40 @@ All brands are exported from the root entry: `import type { AbsolutePath } from 
 |           | `NfcString`, `NfdString`, `NfkcString`, `NfkdString`                | A Unicode-normalized string                                           |
 |           | `WellFormedString`                                                  | A string without lone surrogates                                      |
 |           | `RegExpSource`                                                      | A pattern that matches a string literally                             |
+|           | `HttpDate`                                                          | `Www, DD Mmm YYYY HH:mm:ss GMT`                                       |
+|           | `CssIdentifier`                                                     | Output of `CSS.escape`                                                |
 | Identity  | `UUID`                                                              | A random UUID                                                         |
 |           | `Uid`, `Gid`                                                        | A user or group id                                                    |
 |           | `AsyncId`                                                           | An `async_hooks` id                                                   |
+| Locales   | `LanguageTag`                                                       | A canonical BCP 47 locale identifier                                  |
+|           | `TimeZoneId`                                                        | A time zone `Intl` and Temporal accept                                |
 | Network   | `IPv4`, `IPv6`                                                      | An IP address                                                         |
 
 ## `es2024`
 
 Also loaded by `es2025` and `esnext`.
 
-| API                                                                            | Returns                                              |
-| ------------------------------------------------------------------------------ | ---------------------------------------------------- |
-| `Date.now()`, `Date.parse()`, `Date.UTC()`                                     | `EpochMilliseconds`                                  |
-| `Date#getTime()`, `Date#valueOf()`                                             | `EpochMilliseconds`                                  |
-| `Date#toISOString()`, `Date#toJSON()`                                          | `IsoUtcString`                                       |
-| `Date#getTimezoneOffset()`                                                     | `Minutes`                                            |
-| `String#normalize()`, `normalize("NFC")`                                       | `NfcString`                                          |
-| `String#normalize("NFD" \| "NFKC" \| "NFKD")`                                  | `NfdString`, `NfkcString`, `NfkdString`              |
-| `String#toWellFormed()`                                                        | `WellFormedString`                                   |
-| `String#isWellFormed()`                                                        | Type guard: `this is WellFormedString`               |
-| `Number.isFinite(x)`, `Number.isInteger(x)`, `Number.isSafeInteger(x)`         | Type guards: `x is Finite`, `Integer`, `SafeInteger` |
-| `Math.floor()`, `Math.ceil()`, `Math.round()`, `Math.trunc()` given a `Finite` | `Integer`                                            |
-| `JSON.stringify()`                                                             | `Json`                                               |
-| `encodeURIComponent()`, `encodeURI()`                                          | `EncodedUriComponent`, `EncodedUri`                  |
+| API                                                                                    | Returns                                              |
+| -------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `Date.now()`, `Date.parse()`, `Date.UTC()`                                             | `EpochMilliseconds`                                  |
+| `Date#getTime()`, `Date#valueOf()`                                                     | `EpochMilliseconds`                                  |
+| `Date#toISOString()`, `Date#toJSON()`                                                  | `IsoUtcString`                                       |
+| `Date#getTimezoneOffset()`                                                             | `Minutes`                                            |
+| `Date#setTime()` and every other `Date#set…()` method                                  | `EpochMilliseconds`                                  |
+| `Date#toUTCString()`                                                                   | `HttpDate`                                           |
+| `String#normalize()`, `normalize("NFC")`                                               | `NfcString`                                          |
+| `String#normalize("NFD" \| "NFKC" \| "NFKD")`                                          | `NfdString`, `NfkcString`, `NfkdString`              |
+| `String#toWellFormed()`                                                                | `WellFormedString`                                   |
+| `String#isWellFormed()`                                                                | Type guard: `this is WellFormedString`               |
+| `Number.isFinite(x)`, `Number.isInteger(x)`, `Number.isSafeInteger(x)`                 | Type guards: `x is Finite`, `Integer`, `SafeInteger` |
+| `Math.floor()`, `Math.ceil()`, `Math.round()`, `Math.trunc()` given a `Finite`         | `Integer`                                            |
+| `Math.clz32()`, `Math.imul()`, `DataView#getInt8/16/32()`, `getUint8/16/32()`          | `SafeInteger`                                        |
+| `Intl.getCanonicalLocales()`, `Intl.Locale#toString()`                                 | `LanguageTag`                                        |
+| `Intl.supportedValuesOf("timeZone")`, `Intl.DateTimeFormat#resolvedOptions().timeZone` | `TimeZoneId`                                         |
+| `JSON.stringify()`                                                                     | `Json`                                               |
+| `encodeURIComponent()`, `encodeURI()`                                                  | `EncodedUriComponent`, `EncodedUri`                  |
 
-`Date.parse()` and `Date#getTime()` return `NaN` for an invalid date, and `Date#toJSON()` returns `null`: the brand marks the unit or format, not validity. `Date#toISOString()` throws instead, so its brand always holds.
+`Date.parse()`, `Date#getTime()` and the setters return `NaN` for an invalid date, `Date#toUTCString()` returns `"Invalid Date"`, and `Date#toJSON()` returns `null`: the brand marks the unit or format, not validity. `Date#toISOString()` throws instead, so its brand always holds.
 
 ## `es2025`
 
@@ -69,22 +78,30 @@ Also loaded by `esnext`. Needs TypeScript 7, since TypeScript 5.9 has no `es2025
 
 Needs TypeScript 7.
 
-| API                                                         | Returns     |
-| ----------------------------------------------------------- | ----------- |
-| `Uint8Array#toBase64()`, `toBase64({ alphabet: "base64" })` | `Base64`    |
-| `Uint8Array#toBase64({ alphabet: "base64url" })`            | `Base64Url` |
-| `Uint8Array#toHex()`                                        | `Hex`       |
+| API                                                                                                                                   | Returns                                                             |
+| ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `Uint8Array#toBase64()`, `toBase64({ alphabet: "base64" })`                                                                           | `Base64`                                                            |
+| `Uint8Array#toBase64({ alphabet: "base64url" })`                                                                                      | `Base64Url`                                                         |
+| `Uint8Array#toHex()`                                                                                                                  | `Hex`                                                               |
+| `Temporal.Duration#total("minutes")`, and `"seconds"`, `"milliseconds"`, `"microseconds"`, `"nanoseconds"`, singular or as `{ unit }` | `Minutes`, `Seconds`, `Milliseconds`, `Microseconds`, `Nanoseconds` |
+| `Temporal.Now.timeZoneId()`, `Intl.Locale#getTimeZones()`                                                                             | `TimeZoneId`                                                        |
 
 ## `dom`
 
-| API                                                               | Returns                |
-| ----------------------------------------------------------------- | ---------------------- |
-| `performance.now()`                                               | `PerformanceTimestamp` |
-| `performance.mark().startTime`, `performance.measure().startTime` | `PerformanceTimestamp` |
-| `performance.measure().duration`                                  | `Milliseconds`         |
-| `crypto.randomUUID()`                                             | `UUID`                 |
-| `btoa()`                                                          | `Base64`               |
-| `URL#toString()`, `URL#toJSON()`                                  | `AbsoluteUrl`          |
+| API                                                                                                                                                                                         | Returns                                |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `performance.now()`                                                                                                                                                                         | `PerformanceTimestamp`                 |
+| `performance.mark().startTime`, `performance.measure().startTime`                                                                                                                           | `PerformanceTimestamp`                 |
+| `performance.measure().duration`                                                                                                                                                            | `Milliseconds`                         |
+| `performance.getEntries…()`, `PerformanceObserverEntryList#getEntries…()`: `.startTime`, `.duration`                                                                                        | `PerformanceTimestamp`, `Milliseconds` |
+| `IdleDeadline#timeRemaining()`                                                                                                                                                              | `Milliseconds`                         |
+| `TimeRanges#start()`, `end()` (`media.buffered`, `.played`, `.seekable`), `SVGAnimationElement#getCurrentTime()`, `getStartTime()`, `getSimpleDuration()`, `SVGSVGElement#getCurrentTime()` | `Seconds`                              |
+| `AudioData#allocationSize()`, `VideoFrame#allocationSize()`, `TextEncoder#encodeInto().written`, `navigator.storage.estimate()`: `.usage`, `.quota`                                         | `Bytes`                                |
+| `TextDecoder#decode()`, `Blob#text()`, `Response#text()`, `Request#text()`                                                                                                                  | `WellFormedString`                     |
+| `CSS.escape()`                                                                                                                                                                              | `CssIdentifier`                        |
+| `crypto.randomUUID()`                                                                                                                                                                       | `UUID`                                 |
+| `btoa()`                                                                                                                                                                                    | `Base64`                               |
+| `URL#toString()`, `URL#toJSON()`, `location.toString()`, `import.meta.resolve()`                                                                                                            | `AbsoluteUrl`                          |
 
 ## `node22`, `node24`, `node26`
 

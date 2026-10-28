@@ -58,6 +58,10 @@ export type IsoUtcString = Brand<string, "IsoUtcString">;
 export type WellFormedString = Brand<string, "WellFormedString">;
 /** Output of `RegExp.escape()`: a pattern that matches the escaped string literally. */
 export type RegExpSource = Brand<string, "RegExpSource">;
+/** Output of `Date#toUTCString()`, the HTTP date format: `Www, DD Mmm YYYY HH:mm:ss GMT`. */
+export type HttpDate = Brand<string, "HttpDate">;
+/** Output of `CSS.escape()`: an identifier that matches the escaped string literally in a selector. */
+export type CssIdentifier = Brand<string, "CssIdentifier">;
 /** Output of `String#normalize("NFC")`. */
 export type NfcString = Brand<string, "NfcString">;
 /** Output of `String#normalize("NFD")`. */
@@ -66,6 +70,11 @@ export type NfdString = Brand<string, "NfdString">;
 export type NfkcString = Brand<string, "NfkcString">;
 /** Output of `String#normalize("NFKD")`. */
 export type NfkdString = Brand<string, "NfkdString">;
+
+/** A canonicalized Unicode BCP 47 locale identifier, as `Intl.getCanonicalLocales()` returns. */
+export type LanguageTag = Brand<string, "LanguageTag">;
+/** A time zone identifier that `Intl.DateTimeFormat` and Temporal accept: an IANA name or a UTC offset. */
+export type TimeZoneId = Brand<string, "TimeZoneId">;
 
 /** A number that is not NaN or ±Infinity. */
 export type Finite = Brand<number, "Finite">;

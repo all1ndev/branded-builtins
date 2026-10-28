@@ -74,6 +74,7 @@ Each entry includes the ones below it. Never pick an entry above your `lib`: it 
 | 🔢 Numbers         | `Finite`, `Integer`, `SafeInteger`                                                               | `Number.isSafeInteger()`, `Math.floor()`, `crypto.randomInt()`                |
 | 🔤 Encodings       | `Hex`, `Base64`, `Json`, `EncodedUriComponent`, `AbsoluteUrl`, `IsoUtcString`, `NfcString`       | `hash.digest("hex")`, `JSON.stringify()`, `date.toISOString()`                |
 | 🪪 Identity        | `UUID`, `Uid`, `Gid`, `AsyncId`                                                                  | `crypto.randomUUID()`, `os.userInfo().uid`                                    |
+| 🌍 Locales         | `LanguageTag`, `TimeZoneId`                                                                      | `Intl.getCanonicalLocales()`, `Temporal.Now.timeZoneId()`                     |
 | 🌐 Network         | `IPv4`, `IPv6`                                                                                   | `net.isIPv4()`, `dns.promises.resolve4()`                                     |
 
 See **[API.md](API.md)** for every branded API.

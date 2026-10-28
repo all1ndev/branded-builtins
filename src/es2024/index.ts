@@ -6,15 +6,18 @@ import type {
 	EncodedUriComponent,
 	EpochMilliseconds,
 	Finite,
+	HttpDate,
 	Integer,
 	IsoUtcString,
 	Minutes,
 	Json,
+	LanguageTag,
 	NfcString,
 	NfdString,
 	NfkcString,
 	NfkdString,
 	SafeInteger,
+	TimeZoneId,
 	WellFormedString,
 } from "../index.ts";
 
@@ -40,7 +43,25 @@ declare global {
 		toISOString(): IsoUtcString;
 		// null at runtime for an invalid date, which the lib's `string` already ignores.
 		toJSON(key?: any): IsoUtcString;
+		// "Invalid Date" for an invalid date, like getTime's NaN.
+		toUTCString(): HttpDate;
 		getTimezoneOffset(): Minutes;
+		// The setters return the new time value.
+		setTime(time: number): EpochMilliseconds;
+		setMilliseconds(ms: number): EpochMilliseconds;
+		setUTCMilliseconds(ms: number): EpochMilliseconds;
+		setSeconds(sec: number, ms?: number): EpochMilliseconds;
+		setUTCSeconds(sec: number, ms?: number): EpochMilliseconds;
+		setMinutes(min: number, sec?: number, ms?: number): EpochMilliseconds;
+		setUTCMinutes(min: number, sec?: number, ms?: number): EpochMilliseconds;
+		setHours(hours: number, min?: number, sec?: number, ms?: number): EpochMilliseconds;
+		setUTCHours(hours: number, min?: number, sec?: number, ms?: number): EpochMilliseconds;
+		setDate(date: number): EpochMilliseconds;
+		setUTCDate(date: number): EpochMilliseconds;
+		setMonth(month: number, date?: number): EpochMilliseconds;
+		setUTCMonth(month: number, date?: number): EpochMilliseconds;
+		setFullYear(year: number, month?: number, date?: number): EpochMilliseconds;
+		setUTCFullYear(year: number, month?: number, date?: number): EpochMilliseconds;
 	}
 
 	interface String {
@@ -66,6 +87,29 @@ declare global {
 		ceil(x: Finite): Integer;
 		round(x: Finite): Integer;
 		trunc(x: Finite): Integer;
+		// Both convert their arguments to 32-bit integers, so even NaN gives an integer.
+		clz32(x: number): SafeInteger;
+		imul(x: number, y: number): SafeInteger;
+	}
+
+	interface DataView<TArrayBuffer extends ArrayBufferLike> {
+		getInt8(byteOffset: number): SafeInteger;
+		getInt16(byteOffset: number, littleEndian?: boolean): SafeInteger;
+		getInt32(byteOffset: number, littleEndian?: boolean): SafeInteger;
+		getUint8(byteOffset: number): SafeInteger;
+		getUint16(byteOffset: number, littleEndian?: boolean): SafeInteger;
+		getUint32(byteOffset: number, littleEndian?: boolean): SafeInteger;
+	}
+
+	namespace Intl {
+		function getCanonicalLocales(locale?: string | readonly string[]): LanguageTag[];
+		function supportedValuesOf(key: "timeZone"): TimeZoneId[];
+		interface Locale {
+			toString(): LanguageTag;
+		}
+		interface DateTimeFormat {
+			resolvedOptions(): ResolvedDateTimeFormatOptions & { timeZone: TimeZoneId };
+		}
 	}
 
 	interface JSON {
