@@ -109,7 +109,7 @@ crypto.webcrypto.randomUUID() satisfies B.UUID;
 globalThis.crypto.randomUUID() satisfies B.UUID;
 crypto.randomUUID() satisfies crypto.UUID;
 // @ts-expect-error a matching template literal is not enough
-("a-b-c-d-e" as crypto.UUID) satisfies B.UUID;
+"a-b-c-d-e" as crypto.UUID satisfies B.UUID;
 
 // Time
 performance.now() satisfies B.PerformanceTimestamp;

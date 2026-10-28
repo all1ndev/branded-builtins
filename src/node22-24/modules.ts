@@ -74,42 +74,79 @@ declare module "fs" {
 	}
 	// A relative prefix or path gives a relative result, so only absolute input keeps the brand.
 	function mkdtempSync(prefix: AbsolutePath, options?: EncodingOption): AbsolutePath;
-	function mkdirSync(path: AbsolutePath, options: MakeDirectoryOptions & { recursive: true }): AbsolutePath | undefined;
+	function mkdirSync(
+		path: AbsolutePath,
+		options: MakeDirectoryOptions & { recursive: true },
+	): AbsolutePath | undefined;
 	function openSync(path: PathLike, flags?: OpenMode, mode?: Mode | null): FileDescriptor;
 
-	function readSync(fd: number, buffer: NodeJS.ArrayBufferView, offset: number, length: number, position: ReadPosition | null): Bytes;
+	function readSync(
+		fd: number,
+		buffer: NodeJS.ArrayBufferView,
+		offset: number,
+		length: number,
+		position: ReadPosition | null,
+	): Bytes;
 	function readSync(fd: number, buffer: NodeJS.ArrayBufferView, opts?: ReadOptions): Bytes;
-	function writeSync(fd: number, buffer: NodeJS.ArrayBufferView, offset?: number | null, length?: number | null, position?: number | null): Bytes;
+	function writeSync(
+		fd: number,
+		buffer: NodeJS.ArrayBufferView,
+		offset?: number | null,
+		length?: number | null,
+		position?: number | null,
+	): Bytes;
 	function writeSync(fd: number, string: string, position?: number | null, encoding?: BufferEncoding | null): Bytes;
 
 	// statSync and lstatSync are both typed as StatSyncFn.
 	interface StatSyncFn {
 		(path: PathLike, options?: undefined): BrandedStats;
-		(path: PathLike, options?: StatSyncOptions & { bigint?: false | undefined; throwIfNoEntry: false }): BrandedStats | undefined;
+		(
+			path: PathLike,
+			options?: StatSyncOptions & { bigint?: false | undefined; throwIfNoEntry: false },
+		): BrandedStats | undefined;
 		(path: PathLike, options?: StatSyncOptions & { bigint?: false | undefined }): BrandedStats;
 	}
 }
 
 declare module "fs/promises" {
 	function realpath(path: PathLike, options?: ObjectEncodingOptions | BufferEncoding | null): Promise<AbsolutePath>;
-	function mkdtemp(prefix: AbsolutePath, options?: ObjectEncodingOptions | BufferEncoding | null): Promise<AbsolutePath>;
-	function mkdir(path: AbsolutePath, options: MakeDirectoryOptions & { recursive: true }): Promise<AbsolutePath | undefined>;
-	function open(path: PathLike, flags?: string | number, mode?: Mode): Promise<FileHandle & { readonly fd: FileDescriptor }>;
+	function mkdtemp(
+		prefix: AbsolutePath,
+		options?: ObjectEncodingOptions | BufferEncoding | null,
+	): Promise<AbsolutePath>;
+	function mkdir(
+		path: AbsolutePath,
+		options: MakeDirectoryOptions & { recursive: true },
+	): Promise<AbsolutePath | undefined>;
+	function open(
+		path: PathLike,
+		flags?: string | number,
+		mode?: Mode,
+	): Promise<FileHandle & { readonly fd: FileDescriptor }>;
 
 	function stat(path: PathLike, opts?: StatOptions & { bigint?: false | undefined }): Promise<BrandedStats>;
 	function lstat(path: PathLike, opts?: StatOptions & { bigint?: false | undefined }): Promise<BrandedStats>;
 
 	interface FileHandle {
-		stat(opts?: StatOptions & { bigint?: false | undefined; throwIfNoEntry?: true | undefined }): Promise<BrandedStats>;
-		stat(opts?: StatOptions & { bigint?: false | undefined; throwIfNoEntry: false }): Promise<BrandedStats | undefined>;
+		stat(
+			opts?: StatOptions & { bigint?: false | undefined; throwIfNoEntry?: true | undefined },
+		): Promise<BrandedStats>;
+		stat(
+			opts?: StatOptions & { bigint?: false | undefined; throwIfNoEntry: false },
+		): Promise<BrandedStats | undefined>;
 		read<T extends NodeJS.ArrayBufferView>(
 			buffer: T,
 			offset?: number | null,
 			length?: number | null,
 			position?: ReadPosition | null,
 		): Promise<FileReadResult<T> & { bytesRead: Bytes }>;
-		read<T extends NodeJS.ArrayBufferView>(buffer: T, options?: ReadOptions): Promise<FileReadResult<T> & { bytesRead: Bytes }>;
-		read<T extends NodeJS.ArrayBufferView = NonSharedBuffer>(options?: ReadOptionsWithBuffer<T>): Promise<FileReadResult<T> & { bytesRead: Bytes }>;
+		read<T extends NodeJS.ArrayBufferView>(
+			buffer: T,
+			options?: ReadOptions,
+		): Promise<FileReadResult<T> & { bytesRead: Bytes }>;
+		read<T extends NodeJS.ArrayBufferView = NonSharedBuffer>(
+			options?: ReadOptionsWithBuffer<T>,
+		): Promise<FileReadResult<T> & { bytesRead: Bytes }>;
 		write<TBuffer extends NodeJS.ArrayBufferView>(
 			buffer: TBuffer,
 			offset?: number | null,
@@ -120,7 +157,11 @@ declare module "fs/promises" {
 			buffer: TBuffer,
 			options?: { offset?: number; length?: number; position?: number },
 		): Promise<{ bytesWritten: Bytes; buffer: TBuffer }>;
-		write(data: string, position?: number | null, encoding?: BufferEncoding | null): Promise<{ bytesWritten: Bytes; buffer: string }>;
+		write(
+			data: string,
+			position?: number | null,
+			encoding?: BufferEncoding | null,
+		): Promise<{ bytesWritten: Bytes; buffer: string }>;
 	}
 }
 
@@ -130,8 +171,12 @@ declare module "os" {
 	function uptime(): Seconds;
 	function totalmem(): Bytes;
 	function freemem(): Bytes;
-	function userInfo(options?: UserInfoOptionsWithStringEncoding): UserInfo<string> & { uid: Uid; gid: Gid; homedir: AbsolutePath };
-	function networkInterfaces(): NodeJS.Dict<((NetworkInterfaceInfoIPv4 & { address: IPv4 }) | (NetworkInterfaceInfoIPv6 & { address: IPv6 }))[]>;
+	function userInfo(
+		options?: UserInfoOptionsWithStringEncoding,
+	): UserInfo<string> & { uid: Uid; gid: Gid; homedir: AbsolutePath };
+	function networkInterfaces(): NodeJS.Dict<
+		((NetworkInterfaceInfoIPv4 & { address: IPv4 }) | (NetworkInterfaceInfoIPv6 & { address: IPv6 }))[]
+	>;
 }
 
 declare module "crypto" {
@@ -169,7 +214,10 @@ declare module "perf_hooks" {
 			startMark?: string,
 			endMark?: string,
 		): PerformanceMeasure & { readonly startTime: PerformanceTimestamp; readonly duration: Milliseconds };
-		measure(name: string, options: MeasureOptions): PerformanceMeasure & { readonly startTime: PerformanceTimestamp; readonly duration: Milliseconds };
+		measure(
+			name: string,
+			options: MeasureOptions,
+		): PerformanceMeasure & { readonly startTime: PerformanceTimestamp; readonly duration: Milliseconds };
 	}
 }
 

@@ -6,7 +6,10 @@ import type { Milliseconds, PerformanceTimestamp } from "../index.ts";
 
 declare global {
 	interface Performance {
-		mark(markName: string, markOptions?: PerformanceMarkOptions): PerformanceMark & { readonly startTime: PerformanceTimestamp };
+		mark(
+			markName: string,
+			markOptions?: PerformanceMarkOptions,
+		): PerformanceMark & { readonly startTime: PerformanceTimestamp };
 		measure(
 			measureName: string,
 			startOrMeasureOptions?: string | PerformanceMeasureOptions,

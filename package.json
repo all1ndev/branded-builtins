@@ -1,77 +1,80 @@
 {
-  "name": "@all1ndev/branded-builtins",
-  "version": "0.1.0",
-  "description": "Branded types for JavaScript, DOM and Node.js built-in APIs, added through declaration merging",
-  "keywords": [
-    "typescript",
-    "types",
-    "branded-types",
-    "nominal-types",
-    "declaration-merging",
-    "ts-reset",
-    "node",
-    "dom"
-  ],
-  "homepage": "https://github.com/all1ndev/branded-builtins#readme",
-  "bugs": {
-    "url": "https://github.com/all1ndev/branded-builtins/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/all1ndev/branded-builtins.git"
-  },
-  "license": "MIT",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts"
-    },
-    "./es2024": {
-      "types": "./dist/es2024/index.d.ts"
-    },
-    "./es2025": {
-      "types": "./dist/es2025/index.d.ts"
-    },
-    "./esnext": {
-      "types": "./dist/esnext/index.d.ts"
-    },
-    "./dom": {
-      "types": "./dist/dom/index.d.ts"
-    },
-    "./node22": {
-      "types": "./dist/node22/index.d.ts"
-    },
-    "./node24": {
-      "types": "./dist/node24/index.d.ts"
-    },
-    "./node26": {
-      "types": "./dist/node26/index.d.ts"
-    }
-  },
-  "files": [
-    "dist",
-    "API.md"
-  ],
-  "scripts": {
-    "build": "sh scripts/build.sh",
-    "prepack": "npm run build",
-    "test": "npm run build && sh scripts/test.sh"
-  },
-  "peerDependencies": {
-    "@types/node": "^22.20.5 || ^24.19.2 || >=26.6.5",
-    "typescript": ">=5.9"
-  },
-  "peerDependenciesMeta": {
-    "@types/node": {
-      "optional": true
-    }
-  },
-  "devDependencies": {
-    "@total-typescript/ts-reset": "^0.6.1",
-    "@types22/node": "npm:@types/node@^22.20.5",
-    "@types24/node": "npm:@types/node@^24.19.2",
-    "@types26/node": "npm:@types/node@^26.6.5",
-    "typescript": "^7.0.2",
-    "typescript5": "npm:typescript@^5.9.3"
-  }
+	"name": "@all1ndev/branded-builtins",
+	"version": "0.1.0",
+	"description": "Branded types for JavaScript, DOM and Node.js built-in APIs, added through declaration merging",
+	"keywords": [
+		"typescript",
+		"types",
+		"branded-types",
+		"nominal-types",
+		"declaration-merging",
+		"ts-reset",
+		"node",
+		"dom"
+	],
+	"homepage": "https://github.com/all1ndev/branded-builtins#readme",
+	"bugs": {
+		"url": "https://github.com/all1ndev/branded-builtins/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/all1ndev/branded-builtins.git"
+	},
+	"license": "MIT",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts"
+		},
+		"./es2024": {
+			"types": "./dist/es2024/index.d.ts"
+		},
+		"./es2025": {
+			"types": "./dist/es2025/index.d.ts"
+		},
+		"./esnext": {
+			"types": "./dist/esnext/index.d.ts"
+		},
+		"./dom": {
+			"types": "./dist/dom/index.d.ts"
+		},
+		"./node22": {
+			"types": "./dist/node22/index.d.ts"
+		},
+		"./node24": {
+			"types": "./dist/node24/index.d.ts"
+		},
+		"./node26": {
+			"types": "./dist/node26/index.d.ts"
+		}
+	},
+	"files": [
+		"dist",
+		"API.md"
+	],
+	"scripts": {
+		"build": "sh scripts/build.sh",
+		"prepack": "npm run build",
+		"test": "npm run build && sh scripts/test.sh",
+		"format": "prettier --write --ignore-unknown ."
+	},
+	"peerDependencies": {
+		"@types/node": "^22.20.5 || ^24.19.2 || >=26.6.5",
+		"typescript": ">=5.9"
+	},
+	"peerDependenciesMeta": {
+		"@types/node": {
+			"optional": true
+		}
+	},
+	"devDependencies": {
+		"@all1ndev/prettier-config": "^2.0.0",
+		"@total-typescript/ts-reset": "^0.6.1",
+		"@types22/node": "npm:@types/node@^22.20.5",
+		"@types24/node": "npm:@types/node@^24.19.2",
+		"@types26/node": "npm:@types/node@^26.6.5",
+		"prettier": "^3.9.10",
+		"typescript": "^7.0.2",
+		"typescript5": "npm:typescript@^5.9.3"
+	}
 }

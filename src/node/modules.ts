@@ -72,33 +72,82 @@ declare module "node:fs" {
 	}
 	// A relative prefix or path gives a relative result, so only absolute input keeps the brand.
 	function mkdtempSync(prefix: AbsolutePath, options?: EncodingOption): AbsolutePath;
-	function mkdtempDisposableSync(prefix: AbsolutePath, options?: EncodingOption): DisposableTempDir & { path: AbsolutePath };
-	function mkdirSync(path: AbsolutePath, options: MakeDirectoryOptions & { recursive: true }): AbsolutePath | undefined;
+	function mkdtempDisposableSync(
+		prefix: AbsolutePath,
+		options?: EncodingOption,
+	): DisposableTempDir & { path: AbsolutePath };
+	function mkdirSync(
+		path: AbsolutePath,
+		options: MakeDirectoryOptions & { recursive: true },
+	): AbsolutePath | undefined;
 	function openSync(path: PathLike, flags?: OpenMode, mode?: Mode | null): FileDescriptor;
 
-	function readSync(fd: number, buffer: NodeJS.ArrayBufferView, offset: number, length: number, position: ReadPosition | null): Bytes;
+	function readSync(
+		fd: number,
+		buffer: NodeJS.ArrayBufferView,
+		offset: number,
+		length: number,
+		position: ReadPosition | null,
+	): Bytes;
 	function readSync(fd: number, buffer: NodeJS.ArrayBufferView, opts?: ReadOptions): Bytes;
-	function writeSync(fd: number, buffer: NodeJS.ArrayBufferView, offset?: number | null, length?: number | null, position?: number | null): Bytes;
+	function writeSync(
+		fd: number,
+		buffer: NodeJS.ArrayBufferView,
+		offset?: number | null,
+		length?: number | null,
+		position?: number | null,
+	): Bytes;
 	function writeSync(fd: number, string: string, position?: number | null, encoding?: BufferEncoding | null): Bytes;
 
 	function statSync(path: PathLike): BrandedStats;
-	function statSync(path: PathLike, options?: StatOptions & { bigint?: false | undefined; throwIfNoEntry?: true | undefined }): BrandedStats;
-	function statSync(path: PathLike, options: StatOptions & { bigint?: false | undefined; throwIfNoEntry: false }): BrandedStats | undefined;
+	function statSync(
+		path: PathLike,
+		options?: StatOptions & { bigint?: false | undefined; throwIfNoEntry?: true | undefined },
+	): BrandedStats;
+	function statSync(
+		path: PathLike,
+		options: StatOptions & { bigint?: false | undefined; throwIfNoEntry: false },
+	): BrandedStats | undefined;
 	function lstatSync(path: PathLike): BrandedStats;
-	function lstatSync(path: PathLike, options?: StatOptions & { bigint?: false | undefined; throwIfNoEntry?: true | undefined }): BrandedStats;
-	function lstatSync(path: PathLike, options: StatOptions & { bigint?: false | undefined; throwIfNoEntry: false }): BrandedStats | undefined;
+	function lstatSync(
+		path: PathLike,
+		options?: StatOptions & { bigint?: false | undefined; throwIfNoEntry?: true | undefined },
+	): BrandedStats;
+	function lstatSync(
+		path: PathLike,
+		options: StatOptions & { bigint?: false | undefined; throwIfNoEntry: false },
+	): BrandedStats | undefined;
 }
 
 declare module "node:fs/promises" {
 	function realpath(path: PathLike, options?: ObjectEncodingOptions | BufferEncoding | null): Promise<AbsolutePath>;
-	function mkdtemp(prefix: AbsolutePath, options?: ObjectEncodingOptions | BufferEncoding | null): Promise<AbsolutePath>;
-	function mkdtempDisposable(prefix: AbsolutePath, options?: EncodingOption): Promise<DisposableTempDir & { path: AbsolutePath }>;
-	function mkdir(path: AbsolutePath, options: MakeDirectoryOptions & { recursive: true }): Promise<AbsolutePath | undefined>;
-	function open(path: PathLike, flags?: string | number, mode?: Mode): Promise<FileHandle & { readonly fd: FileDescriptor }>;
+	function mkdtemp(
+		prefix: AbsolutePath,
+		options?: ObjectEncodingOptions | BufferEncoding | null,
+	): Promise<AbsolutePath>;
+	function mkdtempDisposable(
+		prefix: AbsolutePath,
+		options?: EncodingOption,
+	): Promise<DisposableTempDir & { path: AbsolutePath }>;
+	function mkdir(
+		path: AbsolutePath,
+		options: MakeDirectoryOptions & { recursive: true },
+	): Promise<AbsolutePath | undefined>;
+	function open(
+		path: PathLike,
+		flags?: string | number,
+		mode?: Mode,
+	): Promise<FileHandle & { readonly fd: FileDescriptor }>;
 
 	function stat(path: PathLike): Promise<BrandedStats>;
-	function stat(path: PathLike, opts?: StatOptions & { bigint?: false | undefined; throwIfNoEntry?: true | undefined }): Promise<BrandedStats>;
-	function stat(path: PathLike, opts: StatOptions & { bigint?: false | undefined; throwIfNoEntry: false }): Promise<BrandedStats | undefined>;
+	function stat(
+		path: PathLike,
+		opts?: StatOptions & { bigint?: false | undefined; throwIfNoEntry?: true | undefined },
+	): Promise<BrandedStats>;
+	function stat(
+		path: PathLike,
+		opts: StatOptions & { bigint?: false | undefined; throwIfNoEntry: false },
+	): Promise<BrandedStats | undefined>;
 	function lstat(path: PathLike, opts?: StatOptions & { bigint?: false | undefined }): Promise<BrandedStats>;
 
 	interface FileHandle {
@@ -109,8 +158,13 @@ declare module "node:fs/promises" {
 			length?: number | null,
 			position?: ReadPosition | null,
 		): Promise<FileReadResult<T> & { bytesRead: Bytes }>;
-		read<T extends NodeJS.ArrayBufferView>(buffer: T, options?: ReadOptions): Promise<FileReadResult<T> & { bytesRead: Bytes }>;
-		read<T extends NodeJS.ArrayBufferView = NonSharedBuffer>(options?: ReadOptionsWithBuffer<T>): Promise<FileReadResult<T> & { bytesRead: Bytes }>;
+		read<T extends NodeJS.ArrayBufferView>(
+			buffer: T,
+			options?: ReadOptions,
+		): Promise<FileReadResult<T> & { bytesRead: Bytes }>;
+		read<T extends NodeJS.ArrayBufferView = NonSharedBuffer>(
+			options?: ReadOptionsWithBuffer<T>,
+		): Promise<FileReadResult<T> & { bytesRead: Bytes }>;
 		write<TBuffer extends NodeJS.ArrayBufferView>(
 			buffer: TBuffer,
 			offset?: number | null,
@@ -121,7 +175,11 @@ declare module "node:fs/promises" {
 			buffer: TBuffer,
 			options?: { offset?: number; length?: number; position?: number },
 		): Promise<{ bytesWritten: Bytes; buffer: TBuffer }>;
-		write(data: string, position?: number | null, encoding?: BufferEncoding | null): Promise<{ bytesWritten: Bytes; buffer: string }>;
+		write(
+			data: string,
+			position?: number | null,
+			encoding?: BufferEncoding | null,
+		): Promise<{ bytesWritten: Bytes; buffer: string }>;
 	}
 }
 
@@ -131,8 +189,12 @@ declare module "node:os" {
 	function uptime(): Seconds;
 	function totalmem(): Bytes;
 	function freemem(): Bytes;
-	function userInfo(options?: UserInfoOptionsWithStringEncoding): UserInfo<string> & { uid: Uid; gid: Gid; homedir: AbsolutePath };
-	function networkInterfaces(): NodeJS.Dict<((NetworkInterfaceInfoIPv4 & { address: IPv4 }) | (NetworkInterfaceInfoIPv6 & { address: IPv6 }))[]>;
+	function userInfo(
+		options?: UserInfoOptionsWithStringEncoding,
+	): UserInfo<string> & { uid: Uid; gid: Gid; homedir: AbsolutePath };
+	function networkInterfaces(): NodeJS.Dict<
+		((NetworkInterfaceInfoIPv4 & { address: IPv4 }) | (NetworkInterfaceInfoIPv6 & { address: IPv6 }))[]
+	>;
 }
 
 declare module "node:crypto" {
@@ -166,7 +228,10 @@ declare module "node:perf_hooks" {
 	function monitorEventLoopDelay(options?: EventLoopMonitorOptions): EventLoopDelays & ELDHistogram;
 	interface Performance {
 		now(): PerformanceTimestamp;
-		mark(markName: string, markOptions?: PerformanceMarkOptions): PerformanceMark & { readonly startTime: PerformanceTimestamp };
+		mark(
+			markName: string,
+			markOptions?: PerformanceMarkOptions,
+		): PerformanceMark & { readonly startTime: PerformanceTimestamp };
 		measure(
 			measureName: string,
 			startMark?: string,

@@ -1,11 +1,7 @@
 {
 	"extends": "../tsconfig.base.json",
 	"compilerOptions": {
-		"typeRoots": [
-			"../node_modules/@types26"
-		]
+		"typeRoots": ["../node_modules/@types26"]
 	},
-	"include": [
-		"index.ts"
-	]
+	"include": ["index.ts"]
 }

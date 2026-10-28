@@ -1,9 +1,7 @@
 {
 	"extends": "./tsconfig.json",
 	"compilerOptions": {
-		"typeRoots": [
-			"../../node_modules/@types24"
-		]
+		"typeRoots": ["../../node_modules/@types24"]
 	},
 	"include": [
 		"index.mts",

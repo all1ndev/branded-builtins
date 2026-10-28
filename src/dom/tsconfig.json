@@ -2,10 +2,7 @@
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
 		"types": [],
-		"lib": [
-			"es2024",
-			"dom"
-		],
+		"lib": ["es2024", "dom"],
 		"rootDir": "..",
 		"outDir": "../../dist",
 		"noEmit": false,
@@ -13,7 +10,5 @@
 		"emitDeclarationOnly": true,
 		"isolatedDeclarations": true
 	},
-	"include": [
-		"index.ts"
-	]
+	"include": ["index.ts"]
 }

@@ -4,7 +4,17 @@
 // Global augmentations for every node entry: these globals are the same in each @types/node.
 // If a version drops one, move its overload out of here into the older entries.
 
-import type { AbsolutePath, Base64, Base64Url, BigIntNanoseconds, Bytes, Hex, Kilobytes, Microseconds, Seconds } from "../index.ts";
+import type {
+	AbsolutePath,
+	Base64,
+	Base64Url,
+	BigIntNanoseconds,
+	Bytes,
+	Hex,
+	Kilobytes,
+	Microseconds,
+	Seconds,
+} from "../index.ts";
 
 declare global {
 	interface Buffer {
@@ -27,7 +37,11 @@ declare global {
 			availableMemory(): Bytes;
 			constrainedMemory(): Bytes;
 			cpuUsage(previousValue?: CpuUsage): CpuUsage & { user: Microseconds; system: Microseconds };
-			resourceUsage(): ResourceUsage & { userCPUTime: Microseconds; systemCPUTime: Microseconds; maxRSS: Kilobytes };
+			resourceUsage(): ResourceUsage & {
+				userCPUTime: Microseconds;
+				systemCPUTime: Microseconds;
+				maxRSS: Kilobytes;
+			};
 		}
 		interface HRTime {
 			(time?: [number, number]): [Seconds, number];

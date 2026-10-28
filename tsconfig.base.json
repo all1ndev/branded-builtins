@@ -1,13 +1,9 @@
 {
 	"compilerOptions": {
-		"lib": [
-			"es2024"
-		],
+		"lib": ["es2024"],
 		"module": "node20",
 		"noEmit": true,
-		"types": [
-			"node"
-		],
+		"types": ["node"],
 		"rewriteRelativeImportExtensions": true,
 		"strict": true,
 		"exactOptionalPropertyTypes": true,

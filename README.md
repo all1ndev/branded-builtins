@@ -38,43 +38,43 @@ Add one ES entry matching your `lib`, plus one entry per host, to `tsconfig.json
 
 ```json
 {
-  "compilerOptions": {
-    "lib": ["es2024"],
-    "types": ["node", "@all1ndev/branded-builtins/es2024", "@all1ndev/branded-builtins/node24"]
-  }
+	"compilerOptions": {
+		"lib": ["es2024"],
+		"types": ["node", "@all1ndev/branded-builtins/es2024", "@all1ndev/branded-builtins/node24"]
+	}
 }
 ```
 
-| Entry | Use when |
-| --- | --- |
-| `/es2024`, `/es2025`, `/esnext` | Your ES `lib`, see below. |
-| `/dom` | You use `lib: ["dom"]`. |
+| Entry                           | Use when                          |
+| ------------------------------- | --------------------------------- |
+| `/es2024`, `/es2025`, `/esnext` | Your ES `lib`, see below.         |
+| `/dom`                          | You use `lib: ["dom"]`.           |
 | `/node22`, `/node24`, `/node26` | You use that `@types/node` major. |
 
 A Node project that also loads the DOM lib should add `/dom` too, since `performance` and `crypto` then take DOM types. The root entry only exports the brand types and changes nothing on its own.
 
 Pick the ES entry for your `lib`, or for your `target` when `lib` isn't set:
 
-| Your `lib` | ES entry |
-| --- | --- |
-| `es2024` | `/es2024` |
-| `es2025` | `/es2025` |
-| `esnext` | `/esnext` |
+| Your `lib`          | ES entry      |
+| ------------------- | ------------- |
+| `es2024`            | `/es2024`     |
+| `es2025`            | `/es2025`     |
+| `esnext`            | `/esnext`     |
 | Older than `es2024` | Not supported |
 
 Each entry includes the ones below it. Never pick an entry above your `lib`: it can declare methods your runtime lacks.
 
 ## Brands
 
-| | Brands | From, for example |
-| --- | --- | --- |
-| 📁 Paths and files | `AbsolutePath`, `FileDescriptor` | `path.resolve()`, `process.cwd()`, `fs.openSync()` |
-| ⏱️ Time | `EpochMilliseconds`, `PerformanceTimestamp`, `Milliseconds`, `Seconds`, `Microseconds`, `Nanoseconds` | `Date.now()`, `performance.now()`, `fs.statSync().mtimeMs` |
-| 📦 Sizes | `Bytes`, `Kilobytes` | `fs.statSync().size`, `Buffer.byteLength()`, `process.resourceUsage().maxRSS` |
-| 🔢 Numbers | `Finite`, `Integer`, `SafeInteger` | `Number.isSafeInteger()` |
-| 🔤 Encodings | `Hex`, `Base64`, `Json`, `EncodedUriComponent`, `AbsoluteUrl`, `IsoUtcString`, `NfcString` | `hash.digest("hex")`, `JSON.stringify()`, `date.toISOString()` |
-| 🪪 Identity | `UUID`, `Uid`, `Gid`, `AsyncId` | `crypto.randomUUID()`, `os.userInfo().uid` |
-| 🌐 Network | `IPv4`, `IPv6` | `net.isIPv4()`, `dns.promises.resolve4()` |
+|                    | Brands                                                                                                | From, for example                                                             |
+| ------------------ | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| 📁 Paths and files | `AbsolutePath`, `FileDescriptor`                                                                      | `path.resolve()`, `process.cwd()`, `fs.openSync()`                            |
+| ⏱️ Time            | `EpochMilliseconds`, `PerformanceTimestamp`, `Milliseconds`, `Seconds`, `Microseconds`, `Nanoseconds` | `Date.now()`, `performance.now()`, `fs.statSync().mtimeMs`                    |
+| 📦 Sizes           | `Bytes`, `Kilobytes`                                                                                  | `fs.statSync().size`, `Buffer.byteLength()`, `process.resourceUsage().maxRSS` |
+| 🔢 Numbers         | `Finite`, `Integer`, `SafeInteger`                                                                    | `Number.isSafeInteger()`                                                      |
+| 🔤 Encodings       | `Hex`, `Base64`, `Json`, `EncodedUriComponent`, `AbsoluteUrl`, `IsoUtcString`, `NfcString`            | `hash.digest("hex")`, `JSON.stringify()`, `date.toISOString()`                |
+| 🪪 Identity        | `UUID`, `Uid`, `Gid`, `AsyncId`                                                                       | `crypto.randomUUID()`, `os.userInfo().uid`                                    |
+| 🌐 Network         | `IPv4`, `IPv6`                                                                                        | `net.isIPv4()`, `dns.promises.resolve4()`                                     |
 
 See **[API.md](API.md)** for every branded API.
 

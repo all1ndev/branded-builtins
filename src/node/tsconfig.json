@@ -1,13 +1,7 @@
 {
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
-		"typeRoots": [
-			"../../node_modules/@types26"
-		]
+		"typeRoots": ["../../node_modules/@types26"]
 	},
-	"include": [
-		"globals.ts",
-		"types.ts",
-		"modules.ts"
-	]
+	"include": ["globals.ts", "types.ts", "modules.ts"]
 }

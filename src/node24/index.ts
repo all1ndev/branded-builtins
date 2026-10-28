@@ -11,11 +11,17 @@ import type { EncodingOption } from "node:fs";
 import type { EventLoopDelays } from "../node/types.ts";
 
 declare module "fs" {
-	function mkdtempDisposableSync(prefix: AbsolutePath, options?: EncodingOption): DisposableTempDir & { path: AbsolutePath };
+	function mkdtempDisposableSync(
+		prefix: AbsolutePath,
+		options?: EncodingOption,
+	): DisposableTempDir & { path: AbsolutePath };
 }
 
 declare module "fs/promises" {
-	function mkdtempDisposable(prefix: AbsolutePath, options?: EncodingOption): Promise<DisposableTempDir & { path: AbsolutePath }>;
+	function mkdtempDisposable(
+		prefix: AbsolutePath,
+		options?: EncodingOption,
+	): Promise<DisposableTempDir & { path: AbsolutePath }>;
 }
 
 declare module "crypto" {

@@ -7,18 +7,18 @@ npm test   # builds dist/, type-checks every test project with TypeScript 7 and 
 
 ## Layout
 
-| Path | What |
-| --- | --- |
-| `src/index.ts` | The brand types (root entry) |
-| `src/es2024`, `src/es2025`, `src/esnext` | ES lib augmentations; each loads the one below |
-| `src/dom/index.ts` | DOM-only augmentations |
-| `src/shared/web.ts` | Web API augmentations both the DOM lib and @types/node declare; loaded by the dom and node entries |
-| `src/node/globals.ts` | Global overloads (`Buffer`, `process`, `btoa`) shared by every node entry |
-| `src/node/modules.ts` | Module overloads for the current layout, which declares modules under `"node:fs"`: 26 and newer |
-| `src/node22-24/modules.ts` | Module overloads for the older layout, which declares modules under bare names (`"fs"`): 22 and 24 |
-| `src/node/types.ts` | Helper types for the node entries |
-| `src/node22`, `src/node24`, `src/node26` | One entry per `@types/node` major: the shared files it needs, plus what only that version has |
-| `test/` | Type-level tests (`satisfies`, `@ts-expect-error`) and `runtime.mjs` |
+| Path                                     | What                                                                                               |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `src/index.ts`                           | The brand types (root entry)                                                                       |
+| `src/es2024`, `src/es2025`, `src/esnext` | ES lib augmentations; each loads the one below                                                     |
+| `src/dom/index.ts`                       | DOM-only augmentations                                                                             |
+| `src/shared/web.ts`                      | Web API augmentations both the DOM lib and @types/node declare; loaded by the dom and node entries |
+| `src/node/globals.ts`                    | Global overloads (`Buffer`, `process`, `btoa`) shared by every node entry                          |
+| `src/node/modules.ts`                    | Module overloads for the current layout, which declares modules under `"node:fs"`: 26 and newer    |
+| `src/node22-24/modules.ts`               | Module overloads for the older layout, which declares modules under bare names (`"fs"`): 22 and 24 |
+| `src/node/types.ts`                      | Helper types for the node entries                                                                  |
+| `src/node22`, `src/node24`, `src/node26` | One entry per `@types/node` major: the shared files it needs, plus what only that version has      |
+| `test/`                                  | Type-level tests (`satisfies`, `@ts-expect-error`) and `runtime.mjs`                               |
 
 Each folder has its own `tsconfig.json`, so editors check it against the right `lib` and `@types/node`.
 

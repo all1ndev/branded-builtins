@@ -2,11 +2,7 @@
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
 		"types": [],
-		"lib": [
-			"es2025"
-		]
+		"lib": ["es2025"]
 	},
-	"include": [
-		"index.ts"
-	]
+	"include": ["index.ts"]
 }

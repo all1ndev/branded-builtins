@@ -2,14 +2,7 @@
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
 		"types": [],
-		"lib": [
-			"es2024",
-			"dom"
-		]
+		"lib": ["es2024", "dom"]
 	},
-	"include": [
-		"index.mts",
-		"../../dist/dom/index.d.ts",
-		"../../dist/es2024/index.d.ts"
-	]
+	"include": ["index.mts", "../../dist/dom/index.d.ts", "../../dist/es2024/index.d.ts"]
 }

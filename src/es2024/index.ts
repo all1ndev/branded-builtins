@@ -21,7 +21,15 @@ declare global {
 		now(): EpochMilliseconds;
 		// NaN for an unparsable string: the brand marks the unit, not validity.
 		parse(s: string): EpochMilliseconds;
-		UTC(year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number): EpochMilliseconds;
+		UTC(
+			year: number,
+			monthIndex: number,
+			date?: number,
+			hours?: number,
+			minutes?: number,
+			seconds?: number,
+			ms?: number,
+		): EpochMilliseconds;
 	}
 	interface Date {
 		getTime(): EpochMilliseconds;

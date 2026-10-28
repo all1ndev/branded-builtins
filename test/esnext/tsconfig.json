@@ -2,12 +2,7 @@
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
 		"types": [],
-		"lib": [
-			"esnext"
-		]
+		"lib": ["esnext"]
 	},
-	"include": [
-		"../es2024/index.mts",
-		"../../dist/esnext/index.d.ts"
-	]
+	"include": ["../es2024/index.mts", "../../dist/esnext/index.d.ts"]
 }
