@@ -1,8 +1,8 @@
 /// <reference types="node" preserve="true" />
 
-// Module overloads for @types/node versions that declare modules under bare names ("fs") and
-// re-export them from "node:fs": 22 and 24. If a version drops an API, move its overload out
-// of here into the older entries.
+// Module overloads for the current @types/node layout, which declares modules under "node:fs"
+// and re-exports them from "fs": 26 and newer. If a version changes or drops an API, older
+// entries keep their own copy of the old overload.
 
 import type {
 	AbsolutePath,
@@ -21,10 +21,11 @@ import type {
 	Seconds,
 	Uid,
 } from "../index.ts";
-// Inside `declare module "crypto"`, `UUID` means crypto's own type.
+// Inside `declare module "node:crypto"`, `UUID` means crypto's own type.
 import type { UUID as BrandedUUID } from "../index.ts";
 import type { LookupAllOptions, LookupOneOptions, LookupOptions, RecordWithTtl, ResolveWithTtlOptions } from "node:dns";
 import type {
+	EncodingOption,
 	MakeDirectoryOptions,
 	Mode,
 	ObjectEncodingOptions,
@@ -34,27 +35,24 @@ import type {
 	ReadPosition,
 	StatOptions,
 } from "node:fs";
-import type { BrandedAddressInfo, BrandedLookupAddress, BrandedStats } from "./types.ts";
+import type { BrandedAddressInfo, BrandedLookupAddress, BrandedStats, EventLoopDelays } from "./types.ts";
 
 // Augmentations are merged with higher priority, so these overloads win over the originals.
 // Only the module that holds the declarations can be augmented: augmenting a module that
 // re-exports it would shadow the original overloads instead of adding to them.
 
-// @types/node 22 types "path" as a `PlatformPath` object, so overloads go on that interface.
-// Members of a module that uses `export =` are augmented at the module top level.
-declare module "path" {
-	interface PlatformPath {
-		resolve(...paths: string[]): AbsolutePath;
-		join(path: AbsolutePath, ...paths: string[]): AbsolutePath;
-		normalize(path: AbsolutePath): AbsolutePath;
-		dirname(path: AbsolutePath): AbsolutePath;
-		toNamespacedPath(path: AbsolutePath): AbsolutePath;
-		parse(path: AbsolutePath): ParsedPath & { root: AbsolutePath; dir: AbsolutePath };
-		isAbsolute(path: string): path is AbsolutePath;
-	}
+// @types/node 26 declares the functions of "node:path" in a namespace exported with `export =`.
+declare module "node:path" {
+	function resolve(...paths: string[]): AbsolutePath;
+	function join(path: AbsolutePath, ...paths: string[]): AbsolutePath;
+	function normalize(path: AbsolutePath): AbsolutePath;
+	function dirname(path: AbsolutePath): AbsolutePath;
+	function toNamespacedPath(path: AbsolutePath): AbsolutePath;
+	function parse(path: AbsolutePath): ParsedPath & { root: AbsolutePath; dir: AbsolutePath };
+	function isAbsolute(path: string): path is AbsolutePath;
 }
 
-declare module "url" {
+declare module "node:url" {
 	function fileURLToPath(url: string | URL, options?: FileUrlToPathOptions): AbsolutePath;
 	interface URL {
 		toString(): AbsoluteUrl;
@@ -62,18 +60,19 @@ declare module "url" {
 	}
 }
 
-declare module "module" {
+declare module "node:module" {
 	function findPackageJSON(specifier: string | URL, base?: string | URL): AbsolutePath | undefined;
 	function getCompileCacheDir(): AbsolutePath | undefined;
 }
 
-declare module "fs" {
+declare module "node:fs" {
 	function realpathSync(path: PathLike, options?: EncodingOption): AbsolutePath;
 	namespace realpathSync {
 		function native(path: PathLike, options?: EncodingOption): AbsolutePath;
 	}
 	// A relative prefix or path gives a relative result, so only absolute input keeps the brand.
 	function mkdtempSync(prefix: AbsolutePath, options?: EncodingOption): AbsolutePath;
+	function mkdtempDisposableSync(prefix: AbsolutePath, options?: EncodingOption): DisposableTempDir & { path: AbsolutePath };
 	function mkdirSync(path: AbsolutePath, options: MakeDirectoryOptions & { recursive: true }): AbsolutePath | undefined;
 	function openSync(path: PathLike, flags?: OpenMode, mode?: Mode | null): FileDescriptor;
 
@@ -82,26 +81,28 @@ declare module "fs" {
 	function writeSync(fd: number, buffer: NodeJS.ArrayBufferView, offset?: number | null, length?: number | null, position?: number | null): Bytes;
 	function writeSync(fd: number, string: string, position?: number | null, encoding?: BufferEncoding | null): Bytes;
 
-	// statSync and lstatSync are both typed as StatSyncFn.
-	interface StatSyncFn {
-		(path: PathLike, options?: undefined): BrandedStats;
-		(path: PathLike, options?: StatSyncOptions & { bigint?: false | undefined; throwIfNoEntry: false }): BrandedStats | undefined;
-		(path: PathLike, options?: StatSyncOptions & { bigint?: false | undefined }): BrandedStats;
-	}
+	function statSync(path: PathLike): BrandedStats;
+	function statSync(path: PathLike, options?: StatOptions & { bigint?: false | undefined; throwIfNoEntry?: true | undefined }): BrandedStats;
+	function statSync(path: PathLike, options: StatOptions & { bigint?: false | undefined; throwIfNoEntry: false }): BrandedStats | undefined;
+	function lstatSync(path: PathLike): BrandedStats;
+	function lstatSync(path: PathLike, options?: StatOptions & { bigint?: false | undefined; throwIfNoEntry?: true | undefined }): BrandedStats;
+	function lstatSync(path: PathLike, options: StatOptions & { bigint?: false | undefined; throwIfNoEntry: false }): BrandedStats | undefined;
 }
 
-declare module "fs/promises" {
+declare module "node:fs/promises" {
 	function realpath(path: PathLike, options?: ObjectEncodingOptions | BufferEncoding | null): Promise<AbsolutePath>;
 	function mkdtemp(prefix: AbsolutePath, options?: ObjectEncodingOptions | BufferEncoding | null): Promise<AbsolutePath>;
+	function mkdtempDisposable(prefix: AbsolutePath, options?: EncodingOption): Promise<DisposableTempDir & { path: AbsolutePath }>;
 	function mkdir(path: AbsolutePath, options: MakeDirectoryOptions & { recursive: true }): Promise<AbsolutePath | undefined>;
 	function open(path: PathLike, flags?: string | number, mode?: Mode): Promise<FileHandle & { readonly fd: FileDescriptor }>;
 
-	function stat(path: PathLike, opts?: StatOptions & { bigint?: false | undefined }): Promise<BrandedStats>;
+	function stat(path: PathLike): Promise<BrandedStats>;
+	function stat(path: PathLike, opts?: StatOptions & { bigint?: false | undefined; throwIfNoEntry?: true | undefined }): Promise<BrandedStats>;
+	function stat(path: PathLike, opts: StatOptions & { bigint?: false | undefined; throwIfNoEntry: false }): Promise<BrandedStats | undefined>;
 	function lstat(path: PathLike, opts?: StatOptions & { bigint?: false | undefined }): Promise<BrandedStats>;
 
 	interface FileHandle {
-		stat(opts?: StatOptions & { bigint?: false | undefined; throwIfNoEntry?: true | undefined }): Promise<BrandedStats>;
-		stat(opts?: StatOptions & { bigint?: false | undefined; throwIfNoEntry: false }): Promise<BrandedStats | undefined>;
+		stat(opts?: StatOptions & { bigint?: false | undefined }): Promise<BrandedStats>;
 		read<T extends NodeJS.ArrayBufferView>(
 			buffer: T,
 			offset?: number | null,
@@ -124,7 +125,7 @@ declare module "fs/promises" {
 	}
 }
 
-declare module "os" {
+declare module "node:os" {
 	function homedir(): AbsolutePath;
 	function tmpdir(): AbsolutePath;
 	function uptime(): Seconds;
@@ -134,7 +135,7 @@ declare module "os" {
 	function networkInterfaces(): NodeJS.Dict<((NetworkInterfaceInfoIPv4 & { address: IPv4 }) | (NetworkInterfaceInfoIPv6 & { address: IPv6 }))[]>;
 }
 
-declare module "crypto" {
+declare module "node:crypto" {
 	interface Hash {
 		digest(encoding: "hex"): Hex;
 		digest(encoding: "base64"): Base64;
@@ -153,6 +154,7 @@ declare module "crypto" {
 	function hash(algorithm: string, data: BinaryLike, options: "base64"): Base64;
 	function hash(algorithm: string, data: BinaryLike, options: "base64url"): Base64Url;
 	function randomUUID(options?: RandomUUIDOptions): BrandedUUID;
+	function randomUUIDv7(options?: RandomUUIDV7Options): BrandedUUID;
 	namespace webcrypto {
 		interface Crypto {
 			randomUUID(): BrandedUUID;
@@ -160,20 +162,25 @@ declare module "crypto" {
 	}
 }
 
-declare module "perf_hooks" {
+declare module "node:perf_hooks" {
+	function monitorEventLoopDelay(options?: EventLoopMonitorOptions): EventLoopDelays & ELDHistogram;
 	interface Performance {
 		now(): PerformanceTimestamp;
-		mark(name: string, options?: MarkOptions): PerformanceMark & { readonly startTime: PerformanceTimestamp };
+		mark(markName: string, markOptions?: PerformanceMarkOptions): PerformanceMark & { readonly startTime: PerformanceTimestamp };
 		measure(
-			name: string,
+			measureName: string,
 			startMark?: string,
 			endMark?: string,
 		): PerformanceMeasure & { readonly startTime: PerformanceTimestamp; readonly duration: Milliseconds };
-		measure(name: string, options: MeasureOptions): PerformanceMeasure & { readonly startTime: PerformanceTimestamp; readonly duration: Milliseconds };
+		measure(
+			measureName: string,
+			options: PerformanceMeasureOptions,
+			endMark?: string,
+		): PerformanceMeasure & { readonly startTime: PerformanceTimestamp; readonly duration: Milliseconds };
 	}
 }
 
-declare module "net" {
+declare module "node:net" {
 	function isIPv4(input: string): input is IPv4;
 	function isIPv6(input: string): input is IPv6;
 	interface Server {
@@ -185,13 +192,13 @@ declare module "net" {
 	}
 }
 
-declare module "dgram" {
+declare module "node:dgram" {
 	interface Socket {
 		address(): BrandedAddressInfo;
 	}
 }
 
-declare module "dns/promises" {
+declare module "node:dns/promises" {
 	function lookup(hostname: string, family: number): Promise<BrandedLookupAddress>;
 	function lookup(hostname: string, options: LookupOneOptions): Promise<BrandedLookupAddress>;
 	function lookup(hostname: string, options: LookupAllOptions): Promise<BrandedLookupAddress[]>;
@@ -206,7 +213,7 @@ declare module "dns/promises" {
 	function resolve6(hostname: string, options: ResolveWithTtlOptions): Promise<(RecordWithTtl & { address: IPv6 })[]>;
 }
 
-declare module "async_hooks" {
+declare module "node:async_hooks" {
 	function executionAsyncId(): AsyncId;
 	function triggerAsyncId(): AsyncId;
 	interface AsyncResource {

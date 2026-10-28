@@ -1,6 +1,6 @@
 /// <reference types="node" preserve="true" />
 /// <reference path="../node/globals.ts" preserve="true" />
-/// <reference path="../node/bare-modules.ts" preserve="true" />
+/// <reference path="../node22-24/modules.ts" preserve="true" />
 
 // Augmentations for @types/node 24: the shared ones, plus the ones added or renamed in 24.
 

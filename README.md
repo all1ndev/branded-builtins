@@ -47,11 +47,22 @@ Add one ES entry matching your `lib`, plus one entry per host, to `tsconfig.json
 
 | Entry | Use when |
 | --- | --- |
-| `/es2024`, `/es2025`, `/esnext` | Your `lib` is that ES level or later. Each includes the ones below it. |
+| `/es2024`, `/es2025`, `/esnext` | Your ES `lib`, see below. |
 | `/dom` | You use `lib: ["dom"]`. |
 | `/node22`, `/node24`, `/node26` | You use that `@types/node` major. |
 
 A Node project that also loads the DOM lib should add `/dom` too, since `performance` and `crypto` then take DOM types. The root entry only exports the brand types and changes nothing on its own.
+
+Pick the ES entry for your `lib`, or for your `target` when `lib` isn't set:
+
+| Your `lib` | ES entry |
+| --- | --- |
+| `es2024` | `/es2024` |
+| `es2025` | `/es2025` |
+| `esnext` | `/esnext` |
+| Older than `es2024` | Not supported |
+
+Each entry includes the ones below it. Never pick an entry above your `lib`: it can declare methods your runtime lacks.
 
 ## Brands
 

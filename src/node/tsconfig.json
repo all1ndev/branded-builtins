@@ -2,12 +2,12 @@
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
 		"typeRoots": [
-			"../../node_modules/@types24"
+			"../../node_modules/@types26"
 		]
 	},
 	"include": [
 		"globals.ts",
 		"types.ts",
-		"bare-modules.ts"
+		"modules.ts"
 	]
 }
