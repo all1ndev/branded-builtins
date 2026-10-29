@@ -508,7 +508,10 @@ db.prepare(raw).run().changes satisfies B.SafeInteger | bigint;
 declare const ttyStream: tty.WriteStream;
 ttyStream.getWindowSize() satisfies [B.Integer, B.Integer];
 declare const rl: readline.Interface;
-rl.getCursorPos().rows satisfies B.Integer;
+rl.getCursorPos().rows satisfies B.ZeroBased;
+rl.getCursorPos().cols satisfies B.Integer;
+// @ts-expect-error cursor positions count from 0
+rl.getCursorPos().rows satisfies B.OneBased;
 mock.fn().mock.callCount() satisfies B.Integer;
 mock.property({ a: 1 }, "a").mock.accessCount() satisfies B.Integer;
 
@@ -521,6 +524,7 @@ udp.address().port satisfies B.SafeInteger;
 udp.remoteAddress().address satisfies B.IPv4 | B.IPv6;
 udp.getRecvBufferSize() satisfies B.Bytes;
 udp.getSendQueueSize() satisfies B.Bytes;
+udp.getSendQueueCount() satisfies B.Integer;
 // @ts-expect-error a count
 udp.getSendQueueCount() satisfies B.Bytes;
 
@@ -557,3 +561,45 @@ http2.getDefaultSettings().maxConcurrentStreams satisfies B.Bytes | undefined;
 	(await dnsp.resolveSrv(raw))[0]!.port satisfies B.Port;
 	(await new dnsp.Resolver().resolveSoa(raw)).expire satisfies B.Seconds;
 })();
+
+// Child process output, key pairs, positions and more
+import childProcess from "node:child_process";
+import { enableCompileCache, SourceMap } from "node:module";
+import querystring from "node:querystring";
+import stream from "node:stream";
+childProcess.execSync(raw, { encoding: "utf8" }) satisfies B.WellFormedString;
+childProcess.execSync(raw, { encoding: "base64" }) satisfies B.Base64;
+childProcess.execFileSync(raw, { encoding: "hex" }) satisfies B.Hex;
+childProcess.execFileSync(raw, [raw], { encoding: "latin1" }) satisfies B.WellFormedString;
+childProcess.spawnSync(raw, { encoding: "utf8" }).stdout satisfies B.WellFormedString;
+childProcess.spawnSync(raw, [raw], { encoding: "base64url" }).stderr satisfies B.Base64Url;
+childProcess.execSync(raw) satisfies Buffer;
+// @ts-expect-error utf16le can give lone surrogates
+childProcess.execSync(raw, { encoding: "utf16le" }) satisfies B.WellFormedString;
+stream.getDefaultHighWaterMark(false) satisfies B.Bytes;
+stream.getDefaultHighWaterMark(true) satisfies B.Integer;
+// @ts-expect-error object mode counts objects
+stream.getDefaultHighWaterMark(true) satisfies B.Bytes;
+enableCompileCache().directory satisfies B.AbsolutePath | undefined;
+declare const sourceMap: SourceMap;
+{
+	const entry = sourceMap.findEntry(0, 0);
+	if ("generatedLine" in entry) {
+		entry.generatedLine satisfies B.ZeroBased;
+		entry.originalColumn satisfies B.ZeroBased;
+		// @ts-expect-error source map offsets count from 0
+		entry.originalLine satisfies B.OneBased;
+	}
+	const origin = sourceMap.findOrigin(1, 1);
+	if ("lineNumber" in origin) {
+		origin.lineNumber satisfies B.OneBased;
+		origin.columnNumber satisfies B.OneBased;
+	}
+}
+util.getCallSites()[0]?.lineNumber satisfies B.OneBased | undefined;
+util.getCallSites({ sourceMap: true })[0]?.columnNumber satisfies B.OneBased | undefined;
+// @ts-expect-error
+util.getCallSites()[0]?.lineNumber satisfies B.ZeroBased | undefined;
+querystring.escape(raw) satisfies B.EncodedUriComponent;
+// @ts-expect-error
+querystring.stringify({ a: raw }) satisfies B.EncodedUriComponent;

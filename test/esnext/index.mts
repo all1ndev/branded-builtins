@@ -21,12 +21,29 @@ duration.total("second") satisfies B.Seconds;
 duration.total({ unit: "milliseconds" }) satisfies B.Milliseconds;
 duration.total({ unit: "microsecond", relativeTo: "2026-01-01" }) satisfies B.Microseconds;
 duration.total("nanoseconds") satisfies B.Nanoseconds;
-duration.total("hours") satisfies number;
+duration.total("hours") satisfies B.Hours;
+duration.total({ unit: "hour" }) satisfies B.Hours;
 // @ts-expect-error
 duration.total("hours") satisfies B.Minutes;
+// @ts-expect-error days can be calendar days
+duration.total("days") satisfies B.Hours;
 // @ts-expect-error
 duration.total("seconds") satisfies B.Milliseconds;
 Temporal.Now.timeZoneId() satisfies B.TimeZoneId;
 new Intl.Locale(raw).getTimeZones() satisfies B.TimeZoneId[] | undefined;
 // @ts-expect-error
 Temporal.Now.instant().toString() satisfies B.TimeZoneId;
+Temporal.Now.instant().toString() satisfies B.IsoInstant;
+Temporal.Now.instant().toJSON() satisfies B.IsoInstant;
+Temporal.Now.plainDateISO().toString() satisfies B.IsoDate;
+Temporal.Now.plainTimeISO().toJSON() satisfies B.IsoTime;
+Temporal.Now.plainDateTimeISO().toString() satisfies B.IsoDateTime;
+Temporal.Now.zonedDateTimeISO().toString() satisfies B.IsoZonedDateTime;
+duration.toString() satisfies B.IsoDuration;
+duration.toJSON() satisfies B.IsoDuration;
+new Date().toISOString() satisfies B.IsoInstant;
+// @ts-expect-error options can drop the offset and time zone
+Temporal.Now.zonedDateTimeISO().toString({ offset: "never", timeZoneName: "never" }) satisfies B.IsoZonedDateTime;
+// @ts-expect-error
+Temporal.Now.instant().toString() satisfies B.IsoUtcString;
+new Intl.DurationFormat().resolvedOptions().locale satisfies B.LanguageTag;

@@ -25,6 +25,7 @@ import type {
 	Microseconds,
 	Milliseconds,
 	Cidr,
+	EncodedUriComponent,
 	MacAddress,
 	PerformanceTimestamp,
 	Pem,
@@ -35,6 +36,7 @@ import type {
 	Uid,
 	Uint32,
 	WellFormedString,
+	ZeroBased,
 } from "../index.ts";
 // Inside `declare module "node:crypto"`, `UUID` means crypto's own type.
 import type { UUID as BrandedUUID } from "../index.ts";
@@ -64,6 +66,7 @@ import type { HeapInfo } from "node:v8";
 import type {
 	BinaryEncoding,
 	BrandedAddressInfo,
+	BrandedCallSite,
 	BrandedChanges,
 	BrandedEventLoopUtilization,
 	BrandedGCStatistics,
@@ -78,9 +81,11 @@ import type {
 	BrandedStatsFs,
 	Encoded,
 	EventLoopDelays,
+	OneBasedPosition,
 	PathEncodingOption,
 	SizesInBytes,
 	TextEncoding,
+	ZeroBasedSourceMapping,
 } from "./types.ts";
 
 // Augmentations are merged with higher priority, so these overloads win over the originals.
@@ -114,6 +119,51 @@ declare module "node:url" {
 declare module "node:module" {
 	function findPackageJSON(specifier: string | URL, base?: string | URL): AbsolutePath | undefined;
 	function getCompileCacheDir(): AbsolutePath | undefined;
+	// A relative cache directory is resolved against the working directory.
+	function enableCompileCache(
+		options?: string | EnableCompileCacheOptions,
+	): EnableCompileCacheResult & { directory?: AbsolutePath };
+	interface SourceMap {
+		findEntry(lineOffset: number, columnOffset: number): ZeroBasedSourceMapping<SourceMapping> | {};
+		findOrigin(lineNumber: number, columnNumber: number): OneBasedPosition<SourceOrigin> | {};
+	}
+}
+
+// Output with an encoding is decoded from one buffer per stream, like Buffer#toString().
+declare module "node:child_process" {
+	function execSync<E extends TextEncoding | BinaryEncoding>(
+		command: string,
+		options: ExecSyncOptions & { encoding: E },
+	): Encoded<E>;
+	function execFileSync<E extends TextEncoding | BinaryEncoding>(
+		file: string,
+		options: ExecFileSyncOptions & { encoding: E },
+	): Encoded<E>;
+	function execFileSync<E extends TextEncoding | BinaryEncoding>(
+		file: string,
+		args: readonly string[],
+		options: ExecFileSyncOptions & { encoding: E },
+	): Encoded<E>;
+	function spawnSync<E extends TextEncoding | BinaryEncoding>(
+		command: string,
+		options: SpawnSyncOptions & { encoding: E },
+	): SpawnSyncReturns<Encoded<E>>;
+	function spawnSync<E extends TextEncoding | BinaryEncoding>(
+		command: string,
+		args: readonly string[],
+		options: SpawnSyncOptions & { encoding: E },
+	): SpawnSyncReturns<Encoded<E>>;
+}
+
+declare module "node:stream" {
+	// Object mode counts objects; otherwise the mark is in bytes.
+	function getDefaultHighWaterMark(objectMode: false): Bytes;
+	function getDefaultHighWaterMark(objectMode: true): Integer;
+}
+
+declare module "node:querystring" {
+	// Escapes the same characters as encodeURIComponent().
+	function escape(str: string): EncodedUriComponent;
 }
 
 declare module "node:fs" {
@@ -476,6 +526,8 @@ declare module "node:vm" {
 declare module "node:util" {
 	// Unpaired surrogates become U+FFFD.
 	function toUSVString(string: string): WellFormedString;
+	function getCallSites(frameCount?: number, options?: GetCallSitesOptions): BrandedCallSite[];
+	function getCallSites(options: GetCallSitesOptions): BrandedCallSite[];
 	// Decoders replace invalid sequences with U+FFFD (or throw when fatal), so the result has no lone surrogates.
 	interface TextDecoder {
 		decode(input?: NodeJS.AllowSharedBufferSource, options?: TextDecodeOptions): WellFormedString;
@@ -512,7 +564,7 @@ declare module "node:tty" {
 
 declare module "node:readline" {
 	interface Interface {
-		getCursorPos(): CursorPos & { rows: Integer; cols: Integer };
+		getCursorPos(): CursorPos & { rows: ZeroBased; cols: ZeroBased };
 	}
 }
 
@@ -572,6 +624,7 @@ declare module "node:dgram" {
 		getRecvBufferSize(): Bytes;
 		getSendBufferSize(): Bytes;
 		getSendQueueSize(): Bytes;
+		getSendQueueCount(): Integer;
 	}
 }
 

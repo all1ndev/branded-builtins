@@ -1,15 +1,17 @@
 // Checks at runtime the facts the brands claim. Types alone can't prove these.
 import assert from "node:assert/strict";
 import { executionAsyncId } from "node:async_hooks";
+import { execFileSync, spawnSync } from "node:child_process";
 import crypto, { randomInt } from "node:crypto";
 import fs from "node:fs";
 import http from "node:http";
 import http2 from "node:http2";
-import { createRequire, findPackageJSON } from "node:module";
+import { createRequire, enableCompileCache, findPackageJSON, SourceMap } from "node:module";
 import net from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { monitorEventLoopDelay, performance } from "node:perf_hooks";
+import querystring from "node:querystring";
 import { DatabaseSync } from "node:sqlite";
 import tls from "node:tls";
 import url, { fileURLToPath } from "node:url";
@@ -184,6 +186,48 @@ if (DatabaseSync.prototype.location) {
 	db.close();
 	fs.rmSync(tmpDb);
 }
+
+// Child process output is decoded from one buffer per stream, so base64 has no padding mid-string.
+const childBase64 = execFileSync(process.execPath, ["-e", "process.stdout.write(Buffer.alloc(1e5, 7))"], {
+	encoding: "base64",
+});
+assert.equal(Buffer.from(childBase64, "base64").toString("base64"), childBase64);
+const childText = spawnSync(process.execPath, ["-e", "process.stdout.write(Buffer.from([0xed, 0xa0, 0x80]))"], {
+	encoding: "utf8",
+}).stdout;
+assert.ok(childText.isWellFormed());
+let allCodeUnits = "";
+for (let i = 0; i < 0x800; i++) allCodeUnits += String.fromCharCode(i);
+assert.equal(querystring.escape(allCodeUnits + "😀"), encodeURIComponent(allCodeUnits + "😀"));
+const cacheDir = path.join(tmp, `branded-cache-${process.pid}`);
+const compileCache = enableCompileCache(path.relative(process.cwd(), cacheDir));
+if (compileCache.directory !== undefined) assert.ok(path.isAbsolute(compileCache.directory));
+fs.rmSync(cacheDir, { recursive: true, force: true });
+
+// Positions: source map offsets count from 0, stack trace positions from 1.
+const sourceMap = new SourceMap({ version: 3, sources: ["a.ts"], names: [], mappings: "AAAA" });
+assert.equal(sourceMap.findEntry(0, 0).generatedLine, 0);
+assert.deepEqual([sourceMap.findOrigin(1, 1).lineNumber, sourceMap.findOrigin(1, 1).columnNumber], [1, 1]);
+if (util.getCallSites) {
+	const [callSite] = util.getCallSites();
+	const callLine = fs.readFileSync(import.meta.filename, "utf8").split("\n")[callSite.lineNumber - 1];
+	assert.equal(callSite.columnNumber, callLine.indexOf("getCallSites()") + 1, "getCallSites positions count from 1");
+}
+
+// Intl, Headers and Temporal formats.
+assert.equal(new Intl.NumberFormat("EN-us", { style: "currency", currency: "usd" }).resolvedOptions().currency, "USD");
+assert.equal(new Intl.Collator("EN-us").resolvedOptions().locale, "en-US");
+assert.deepEqual(Intl.NumberFormat.supportedLocalesOf("EN-us"), ["en-US"]);
+for (const code of Intl.supportedValuesOf("currency")) assert.match(code, /^[A-Z]{3}$/);
+assert.deepEqual([...new Headers({ "X-Mixed": "1" }).keys()], ["x-mixed"]);
+if (globalThis.Temporal) {
+	assert.match(Temporal.Now.instant().toString(), /Z$/);
+	assert.match(Temporal.Now.plainTimeISO().toString(), /^\d{2}:\d{2}:\d{2}/);
+	assert.equal(Temporal.Duration.from({ hours: 1 }).toString(), "PT1H");
+	assert.equal(Temporal.Duration.from({ minutes: 90 }).total("hours"), 1.5);
+	Temporal.Instant.from(new Date().toISOString());
+}
+
 const timeout = setTimeout(() => {
 	assert.equal(+timeout, executionAsyncId(), "a Timeout converts to its async id");
 	console.log("runtime checks passed");

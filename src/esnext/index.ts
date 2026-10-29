@@ -6,6 +6,13 @@ import type {
 	Base64,
 	Base64Url,
 	Hex,
+	Hours,
+	IsoDate,
+	IsoDateTime,
+	IsoDuration,
+	IsoInstant,
+	IsoTime,
+	IsoZonedDateTime,
 	Microseconds,
 	Milliseconds,
 	Minutes,
@@ -28,8 +35,32 @@ declare global {
 		}
 	}
 
+	// Options can drop the offset, time zone or seconds, so only the plain calls are branded.
 	namespace Temporal {
+		interface PlainDate {
+			toString(): IsoDate;
+			toJSON(): IsoDate;
+		}
+		interface PlainTime {
+			toString(): IsoTime;
+			toJSON(): IsoTime;
+		}
+		interface PlainDateTime {
+			toString(): IsoDateTime;
+			toJSON(): IsoDateTime;
+		}
+		interface ZonedDateTime {
+			toString(): IsoZonedDateTime;
+			toJSON(): IsoZonedDateTime;
+		}
+		interface Instant {
+			toString(): IsoInstant;
+			toJSON(): IsoInstant;
+		}
 		interface Duration {
+			toString(): IsoDuration;
+			toJSON(): IsoDuration;
+			total(totalOf: TotalOf<"hour">): Hours;
 			total(totalOf: TotalOf<"minute">): Minutes;
 			total(totalOf: TotalOf<"second">): Seconds;
 			total(totalOf: TotalOf<"millisecond">): Milliseconds;

@@ -66,16 +66,16 @@ Each entry includes the ones below it. Never pick an entry above your `lib`: it 
 
 ## Brands
 
-|                    | Brands                                                                                            | From, for example                                                             |
-| ------------------ | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| 📁 Paths and files | `AbsolutePath`, `FileDescriptor`, `FileMode`                                                      | `path.resolve()`, `process.cwd()`, `fs.openSync()`                            |
-| ⏱️ Time            | `EpochMilliseconds`, `PerformanceTimestamp`, `Milliseconds`, `Seconds`, `Minutes`, `Nanoseconds`  | `Date.now()`, `performance.now()`, `fs.statSync().mtimeMs`                    |
-| 📦 Sizes           | `Bytes`, `Kilobytes`                                                                              | `fs.statSync().size`, `Buffer.byteLength()`, `process.resourceUsage().maxRSS` |
-| 🔢 Numbers         | `Finite`, `Integer`, `SafeInteger`, `Uint32`                                                      | `Number.isSafeInteger()`, `Math.floor()`, `crypto.randomInt()`                |
-| 🔤 Encodings       | `Hex`, `Base64`, `Json`, `EncodedUriComponent`, `AbsoluteUrl`, `IsoUtcString`, `NfcString`, `Pem` | `hash.digest("hex")`, `JSON.stringify()`, `date.toISOString()`                |
-| 🪪 Identity        | `UUID`, `Uid`, `Gid`, `AsyncId`                                                                   | `crypto.randomUUID()`, `os.userInfo().uid`                                    |
-| 🌍 Locales         | `LanguageTag`, `TimeZoneId`                                                                       | `Intl.getCanonicalLocales()`, `Temporal.Now.timeZoneId()`                     |
-| 🌐 Network         | `IPv4`, `IPv6`, `Port`, `Cidr`, `MacAddress`, `HeaderName`                                        | `net.isIPv4()`, `dns.promises.resolve4()`, `server.address().port`            |
+|                    | Brands                                                                                                     | From, for example                                                             |
+| ------------------ | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| 📁 Paths and files | `AbsolutePath`, `FileDescriptor`, `FileMode`                                                               | `path.resolve()`, `process.cwd()`, `fs.openSync()`                            |
+| ⏱️ Time            | `EpochMilliseconds`, `PerformanceTimestamp`, `Milliseconds`, `Seconds`, `Minutes`, `Hours`                 | `Date.now()`, `performance.now()`, `fs.statSync().mtimeMs`                    |
+| 📦 Sizes           | `Bytes`, `Kilobytes`                                                                                       | `fs.statSync().size`, `Buffer.byteLength()`, `process.resourceUsage().maxRSS` |
+| 🔢 Numbers         | `Finite`, `Integer`, `SafeInteger`, `Uint32`, `ZeroBased`, `OneBased`                                      | `Number.isSafeInteger()`, `array.indexOf()`, `util.getCallSites()`            |
+| 🔤 Encodings       | `Hex`, `Base64`, `Json`, `EncodedUriComponent`, `AbsoluteUrl`, `DataUrl`, `IsoUtcString`, `IsoDate`, `Pem` | `hash.digest("hex")`, `JSON.stringify()`, `date.toISOString()`                |
+| 🪪 Identity        | `UUID`, `Uid`, `Gid`, `AsyncId`, `TimerId`                                                                 | `crypto.randomUUID()`, `os.userInfo().uid`, `window.setTimeout()`             |
+| 🌍 Locales         | `LanguageTag`, `TimeZoneId`, `CurrencyCode`                                                                | `Intl.getCanonicalLocales()`, `Temporal.Now.timeZoneId()`                     |
+| 🌐 Network         | `IPv4`, `IPv6`, `Port`, `Cidr`, `MacAddress`, `HeaderName`                                                 | `net.isIPv4()`, `dns.promises.resolve4()`, `server.address().port`            |
 
 See **[API.md](API.md)** for every branded API.
 

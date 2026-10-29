@@ -26,6 +26,8 @@ export type EpochMilliseconds = Brand<number, "EpochMilliseconds">;
 export type PerformanceTimestamp = Brand<number, "PerformanceTimestamp">;
 /** A duration in milliseconds. */
 export type Milliseconds = Brand<number, "Milliseconds">;
+/** A duration in hours. */
+export type Hours = Brand<number, "Hours">;
 /** A duration in minutes. */
 export type Minutes = Brand<number, "Minutes">;
 /** A duration in seconds. */
@@ -59,6 +61,12 @@ export type ColonHexFingerprint = Brand<string, "ColonHexFingerprint">;
 /** A native memory address, as `node:ffi` returns. */
 export type Pointer = Brand<bigint, "Pointer">;
 export type AsyncId = Brand<number, "AsyncId">;
+/** A `setTimeout()` or `setInterval()` handle; `clearTimeout()` and `clearInterval()` accept either. */
+export type TimerId = Brand<number, "TimerId">;
+/** A `requestAnimationFrame()` handle. */
+export type AnimationFrameId = Brand<number, "AnimationFrameId">;
+/** A `requestIdleCallback()` handle. */
+export type IdleCallbackId = Brand<number, "IdleCallbackId">;
 export type Uid = Brand<number, "Uid">;
 export type Gid = Brand<number, "Gid">;
 
@@ -72,8 +80,22 @@ export type EncodedUri = Brand<string, "EncodedUri">;
 export type FormUrlEncoded = Brand<string, "FormUrlEncoded">;
 /** The serialized form of a `URL` object. */
 export type AbsoluteUrl = Brand<string, "AbsoluteUrl">;
-/** Output of `Date#toISOString()`: `YYYY-MM-DDTHH:mm:ss.sssZ`. */
-export type IsoUtcString = Brand<string, "IsoUtcString">;
+/** A `data:` URL, as `HTMLCanvasElement#toDataURL()` returns. */
+export type DataUrl = Brand<string, "AbsoluteUrl" | "DataUrl">;
+/** An exact time in UTC that `Temporal.Instant.from()` accepts: `2026-01-01T12:00:00Z`. */
+export type IsoInstant = Brand<string, "IsoInstant">;
+/** Output of `Date#toISOString()`: `YYYY-MM-DDTHH:mm:ss.sssZ`. Also an `IsoInstant`. */
+export type IsoUtcString = Brand<string, "IsoInstant" | "IsoUtcString">;
+/** A calendar date: `2026-01-01`, with a `[u-ca=…]` annotation for a non-ISO calendar. */
+export type IsoDate = Brand<string, "IsoDate">;
+/** A wall-clock time: `12:00:00`, with fractional seconds when nonzero. */
+export type IsoTime = Brand<string, "IsoTime">;
+/** A date and wall-clock time without a time zone: `2026-01-01T12:00:00`, with a `[u-ca=…]` annotation for a non-ISO calendar. */
+export type IsoDateTime = Brand<string, "IsoDateTime">;
+/** A date and time with its offset and time zone: `2026-01-01T12:00:00+01:00[Europe/Paris]`. */
+export type IsoZonedDateTime = Brand<string, "IsoZonedDateTime">;
+/** An ISO 8601 duration: `P1Y2M3DT4H5M6S`, `PT0S`, `-P1D`. */
+export type IsoDuration = Brand<string, "IsoDuration">;
 /** A string without lone surrogates, as `String#isWellFormed()` checks. */
 export type WellFormedString = Brand<string, "WellFormedString">;
 /** Output of `RegExp.escape()`: a pattern that matches the escaped string literally. */
@@ -93,6 +115,8 @@ export type NfkdString = Brand<string, "NfkdString">;
 
 /** A canonicalized Unicode BCP 47 locale identifier, as `Intl.getCanonicalLocales()` returns. */
 export type LanguageTag = Brand<string, "LanguageTag">;
+/** An ISO 4217 currency code in uppercase: `USD`. */
+export type CurrencyCode = Brand<string, "CurrencyCode">;
 /** A time zone identifier that `Intl.DateTimeFormat` and Temporal accept: an IANA name or a UTC offset. */
 export type TimeZoneId = Brand<string, "TimeZoneId">;
 
@@ -103,3 +127,7 @@ export type Integer = Brand<number, "Finite" | "Integer">;
 export type SafeInteger = Brand<number, "Finite" | "Integer" | "SafeInteger">;
 /** An integer from 0 to 2³² − 1. */
 export type Uint32 = Brand<number, "Finite" | "Integer" | "SafeInteger" | "Uint32">;
+/** A line or column number counted from 0. */
+export type ZeroBased = Brand<number, "Finite" | "Integer" | "SafeInteger" | "ZeroBased">;
+/** A line or column number counted from 1, as in stack traces. */
+export type OneBased = Brand<number, "Finite" | "Integer" | "SafeInteger" | "OneBased">;

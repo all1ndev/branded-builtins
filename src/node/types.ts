@@ -7,6 +7,7 @@ import type { AddressInfo } from "node:net";
 import type { EventLoopUtilization, PerformanceEntry, PerformanceResourceTiming } from "node:perf_hooks";
 import type { StatementResultingChanges } from "node:sqlite";
 import type { PeerCertificate } from "node:tls";
+import type { CallSiteObject } from "node:util";
 import type { HeapSpaceStatistics, HeapStatistics } from "node:v8";
 import type {
 	Base64,
@@ -23,11 +24,13 @@ import type {
 	IPv6,
 	Milliseconds,
 	Nanoseconds,
+	OneBased,
 	PerformanceTimestamp,
 	Port,
 	Seconds,
 	Uid,
 	WellFormedString,
+	ZeroBased,
 } from "../index.ts";
 
 export type BrandedStats = Stats & {
@@ -131,3 +134,14 @@ export type BrandedSettings = Settings & {
 
 // SOA timers are seconds by RFC 1035.
 export type BrandedSoaRecord = SoaRecord & { refresh: Seconds; retry: Seconds; expire: Seconds; minttl: Seconds };
+
+// SourceMap#findEntry() counts from 0.
+export type ZeroBasedSourceMapping<T> = T & {
+	generatedLine: ZeroBased;
+	generatedColumn: ZeroBased;
+	originalLine: ZeroBased;
+	originalColumn: ZeroBased;
+};
+// Stack trace positions count from 1.
+export type OneBasedPosition<T> = T & { lineNumber: OneBased; columnNumber: OneBased };
+export type BrandedCallSite = OneBasedPosition<CallSiteObject>;

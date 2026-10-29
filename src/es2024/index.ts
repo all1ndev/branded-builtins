@@ -2,6 +2,7 @@
 // supports. Needs no host types.
 
 import type {
+	CurrencyCode,
 	EncodedUri,
 	EncodedUriComponent,
 	EpochMilliseconds,
@@ -73,6 +74,28 @@ declare global {
 		normalize(): NfcString;
 		isWellFormed(): this is WellFormedString;
 		toWellFormed(): WellFormedString;
+		// Strings are shorter than 2 ** 53, so their indexes are safe.
+		indexOf(searchString: string, position?: number): SafeInteger;
+		lastIndexOf(searchString: string, position?: number): SafeInteger;
+		// A custom searcher can return anything, so only strings and RegExps are branded.
+		search(regexp: string | RegExp): SafeInteger;
+		codePointAt(pos: number): SafeInteger | undefined;
+	}
+
+	// Arrays are shorter than 2 ** 32, so their indexes and lengths are safe.
+	interface Array<T> {
+		indexOf(searchElement: T, fromIndex?: number): SafeInteger;
+		lastIndexOf(searchElement: T, fromIndex?: number): SafeInteger;
+		findIndex(predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: any): SafeInteger;
+		findLastIndex(predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: any): SafeInteger;
+		push(...items: T[]): SafeInteger;
+		unshift(...items: T[]): SafeInteger;
+	}
+	interface ReadonlyArray<T> {
+		indexOf(searchElement: T, fromIndex?: number): SafeInteger;
+		lastIndexOf(searchElement: T, fromIndex?: number): SafeInteger;
+		findIndex(predicate: (value: T, index: number, obj: readonly T[]) => unknown, thisArg?: any): SafeInteger;
+		findLastIndex(predicate: (value: T, index: number, array: readonly T[]) => unknown, thisArg?: any): SafeInteger;
 	}
 
 	interface NumberConstructor {
@@ -104,11 +127,50 @@ declare global {
 	namespace Intl {
 		function getCanonicalLocales(locale?: string | readonly string[]): LanguageTag[];
 		function supportedValuesOf(key: "timeZone"): TimeZoneId[];
+		function supportedValuesOf(key: "currency"): CurrencyCode[];
 		interface Locale {
 			toString(): LanguageTag;
 		}
+		// Resolved locales are canonicalized, and currency codes uppercased.
 		interface DateTimeFormat {
-			resolvedOptions(): ResolvedDateTimeFormatOptions & { timeZone: TimeZoneId };
+			resolvedOptions(): ResolvedDateTimeFormatOptions & { locale: LanguageTag; timeZone: TimeZoneId };
+		}
+		interface Collator {
+			resolvedOptions(): ResolvedCollatorOptions & { locale: LanguageTag };
+		}
+		interface NumberFormat {
+			resolvedOptions(): ResolvedNumberFormatOptions & { locale: LanguageTag; currency?: CurrencyCode };
+		}
+		interface PluralRules {
+			resolvedOptions(): ResolvedPluralRulesOptions & { locale: LanguageTag };
+		}
+		interface RelativeTimeFormat {
+			resolvedOptions(): ResolvedRelativeTimeFormatOptions & { locale: LanguageTag };
+		}
+		interface DisplayNames {
+			resolvedOptions(): ResolvedDisplayNamesOptions & { locale: LanguageTag };
+		}
+		interface ListFormat {
+			resolvedOptions(): ResolvedListFormatOptions & { locale: LanguageTag };
+		}
+		interface Segmenter {
+			resolvedOptions(): ResolvedSegmenterOptions & { locale: LanguageTag };
+		}
+		// The other formatters' constructors are anonymous types, which can't be augmented.
+		interface DateTimeFormatConstructor {
+			supportedLocalesOf(locales: LocalesArgument, options?: DateTimeFormatOptions): LanguageTag[];
+		}
+		interface CollatorConstructor {
+			supportedLocalesOf(locales: LocalesArgument, options?: CollatorOptions): LanguageTag[];
+		}
+		interface NumberFormatConstructor {
+			supportedLocalesOf(locales: LocalesArgument, options?: NumberFormatOptions): LanguageTag[];
+		}
+		interface PluralRulesConstructor {
+			supportedLocalesOf(
+				locales: LocalesArgument,
+				options?: { localeMatcher?: "lookup" | "best fit" },
+			): LanguageTag[];
 		}
 	}
 

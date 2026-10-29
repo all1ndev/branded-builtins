@@ -70,5 +70,33 @@ import.meta.resolve(raw) satisfies B.AbsoluteUrl;
 // @ts-expect-error
 location.href satisfies B.AbsoluteUrl;
 CSS.escape(raw) satisfies B.CssIdentifier;
+
+declare const canvas: HTMLCanvasElement;
+canvas.toDataURL() satisfies B.DataUrl;
+canvas.toDataURL("image/webp", 0.8) satisfies B.AbsoluteUrl;
+// @ts-expect-error
+new URL(raw).toString() satisfies B.DataUrl;
+performance.getEntriesByType("resource")[0]?.transferSize satisfies B.Bytes | undefined;
+entryList.getEntriesByType("resource")[0]?.decodedBodySize satisfies B.Bytes | undefined;
+performance.getEntriesByType("resource")[0]?.startTime satisfies B.PerformanceTimestamp | undefined;
+// @ts-expect-error a status code
+performance.getEntriesByType("resource")[0]?.responseStatus satisfies B.Bytes | undefined;
+declare const audioContext: AudioContext;
+audioContext.getOutputTimestamp().contextTime satisfies B.Seconds | undefined;
+audioContext.getOutputTimestamp().performanceTime satisfies B.PerformanceTimestamp | undefined;
+window.setTimeout(() => {}, 1) satisfies B.TimerId;
+self.setInterval(() => {}, 1) satisfies B.TimerId;
+requestAnimationFrame(() => {}) satisfies B.AnimationFrameId;
+window.requestAnimationFrame(() => {}) satisfies B.AnimationFrameId;
+requestIdleCallback(() => {}) satisfies B.IdleCallbackId;
+window.requestIdleCallback(() => {}) satisfies B.IdleCallbackId;
+// @ts-expect-error
+requestAnimationFrame(() => {}) satisfies B.TimerId;
+declare const headers: Headers;
+for (const [name] of headers) name satisfies B.LowercaseHeaderName;
+[...headers.keys()] satisfies B.HeaderName[];
+[...headers.entries()][0]?.[0] satisfies B.LowercaseHeaderName | undefined;
+// @ts-expect-error
+[...headers.values()] satisfies B.HeaderName[];
 // @ts-expect-error
 CSS.escape(raw) satisfies B.RegExpSource;

@@ -104,6 +104,44 @@ new Intl.Locale(raw).toString() satisfies B.LanguageTag;
 raw satisfies B.LanguageTag;
 Intl.supportedValuesOf("timeZone") satisfies B.TimeZoneId[];
 new Intl.DateTimeFormat().resolvedOptions().timeZone satisfies B.TimeZoneId;
-new Intl.DateTimeFormat().resolvedOptions().locale satisfies string;
+new Intl.DateTimeFormat().resolvedOptions().locale satisfies B.LanguageTag;
+new Intl.Collator().resolvedOptions().locale satisfies B.LanguageTag;
+new Intl.NumberFormat().resolvedOptions().locale satisfies B.LanguageTag;
+new Intl.NumberFormat().resolvedOptions().currency satisfies B.CurrencyCode | undefined;
+new Intl.PluralRules().resolvedOptions().locale satisfies B.LanguageTag;
+new Intl.RelativeTimeFormat().resolvedOptions().locale satisfies B.LanguageTag;
+new Intl.DisplayNames(raw, { type: "region" }).resolvedOptions().locale satisfies B.LanguageTag;
+new Intl.ListFormat().resolvedOptions().locale satisfies B.LanguageTag;
+new Intl.Segmenter().resolvedOptions().locale satisfies B.LanguageTag;
+// @ts-expect-error
+new Intl.NumberFormat().resolvedOptions().numberingSystem satisfies B.LanguageTag;
+Intl.DateTimeFormat.supportedLocalesOf(raw) satisfies B.LanguageTag[];
+Intl.Collator.supportedLocalesOf([raw]) satisfies B.LanguageTag[];
+Intl.NumberFormat.supportedLocalesOf(raw, { style: "currency" }) satisfies B.LanguageTag[];
+Intl.PluralRules.supportedLocalesOf(raw) satisfies B.LanguageTag[];
+Intl.supportedValuesOf("currency") satisfies B.CurrencyCode[];
+// @ts-expect-error
+Intl.supportedValuesOf("unit") satisfies B.CurrencyCode[];
 // @ts-expect-error
 Intl.supportedValuesOf("currency") satisfies B.TimeZoneId[];
+
+declare const items: number[];
+declare const readonlyItems: readonly string[];
+items.indexOf(1) satisfies B.SafeInteger;
+items.lastIndexOf(1, 2) satisfies B.SafeInteger;
+items.findIndex((item) => item > 1) satisfies B.SafeInteger;
+items.findLastIndex((item) => item > 1) satisfies B.SafeInteger;
+items.push(1, 2) satisfies B.SafeInteger;
+items.unshift(1) satisfies B.SafeInteger;
+readonlyItems.indexOf(raw) satisfies B.SafeInteger;
+readonlyItems.lastIndexOf(raw) satisfies B.SafeInteger;
+readonlyItems.findIndex((item) => item === raw) satisfies B.SafeInteger;
+readonlyItems.findLastIndex((item) => item === raw) satisfies B.SafeInteger;
+raw.indexOf("a") satisfies B.SafeInteger;
+raw.lastIndexOf("a", 1) satisfies B.SafeInteger;
+raw.search(/a/) satisfies B.SafeInteger;
+raw.codePointAt(0) satisfies B.SafeInteger | undefined;
+// @ts-expect-error NaN past the end
+raw.charCodeAt(0) satisfies B.SafeInteger;
+// @ts-expect-error -1 for a missing item
+items.indexOf(1) satisfies B.Uint32;

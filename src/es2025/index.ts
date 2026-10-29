@@ -2,10 +2,16 @@
 
 // Augmentations for APIs added in TypeScript's "es2025" lib.
 
-import type { RegExpSource } from "../index.ts";
+import type { LanguageTag, RegExpSource } from "../index.ts";
 
 declare global {
 	interface RegExpConstructor {
 		escape(string: string): RegExpSource;
+	}
+
+	namespace Intl {
+		interface DurationFormat {
+			resolvedOptions(): ResolvedDurationFormatOptions & { locale: LanguageTag };
+		}
 	}
 }

@@ -18,6 +18,13 @@ import type {
 	PathEncodingOption,
 } from "../node/types.ts";
 
+declare module "module" {
+	// 22 takes only a directory.
+	function enableCompileCache(
+		options?: string | EnableCompileCacheOptions,
+	): EnableCompileCacheResult & { directory?: AbsolutePath };
+}
+
 declare module "fs" {
 	function mkdtempDisposableSync(
 		prefix: AbsolutePath,

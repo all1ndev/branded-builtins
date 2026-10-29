@@ -4,11 +4,16 @@
 
 import type {
 	AbsoluteUrl,
+	AnimationFrameId,
 	Bytes,
 	CssIdentifier,
+	DataUrl,
+	IdleCallbackId,
+	LowercaseHeaderName,
 	Milliseconds,
 	PerformanceTimestamp,
 	Seconds,
+	TimerId,
 	WellFormedString,
 } from "../index.ts";
 
@@ -16,6 +21,12 @@ type BrandedPerformanceEntry = PerformanceEntry & {
 	readonly startTime: PerformanceTimestamp;
 	readonly duration: Milliseconds;
 };
+type BrandedPerformanceResourceTiming = PerformanceResourceTiming &
+	BrandedPerformanceEntry & {
+		readonly transferSize: Bytes;
+		readonly encodedBodySize: Bytes;
+		readonly decodedBodySize: Bytes;
+	};
 
 declare global {
 	interface Performance {
@@ -41,11 +52,13 @@ declare global {
 		): PerformanceMeasure & { readonly duration: Milliseconds };
 		getEntries(): BrandedPerformanceEntry[];
 		getEntriesByName(name: string, type?: string): BrandedPerformanceEntry[];
+		getEntriesByType(type: "resource"): BrandedPerformanceResourceTiming[];
 		getEntriesByType(type: string): BrandedPerformanceEntry[];
 	}
 	interface PerformanceObserverEntryList {
 		getEntries(): BrandedPerformanceEntry[];
 		getEntriesByName(name: string, type?: string): BrandedPerformanceEntry[];
+		getEntriesByType(type: "resource"): BrandedPerformanceResourceTiming[];
 		getEntriesByType(type: string): BrandedPerformanceEntry[];
 	}
 	interface PerformanceObserver {
@@ -54,6 +67,21 @@ declare global {
 	interface IdleDeadline {
 		timeRemaining(): Milliseconds;
 	}
+
+	// Only the Window and worker methods: in a project that also loads @types/node, the global
+	// setTimeout() may be Node's, which returns a Timeout object.
+	interface WindowOrWorkerGlobalScope {
+		setTimeout(handler: TimerHandler, timeout?: number, ...arguments: any[]): TimerId;
+		setInterval(handler: TimerHandler, timeout?: number, ...arguments: any[]): TimerId;
+	}
+	interface AnimationFrameProvider {
+		requestAnimationFrame(callback: FrameRequestCallback): AnimationFrameId;
+	}
+	interface Window {
+		requestIdleCallback(callback: IdleRequestCallback, options?: IdleRequestOptions): IdleCallbackId;
+	}
+	function requestAnimationFrame(callback: FrameRequestCallback): AnimationFrameId;
+	function requestIdleCallback(callback: IdleRequestCallback, options?: IdleRequestOptions): IdleCallbackId;
 
 	// Media and SVG animation timelines count in seconds.
 	interface TimeRanges {
@@ -67,6 +95,9 @@ declare global {
 	}
 	interface SVGSVGElement {
 		getCurrentTime(): Seconds;
+	}
+	interface AudioContext {
+		getOutputTimestamp(): AudioTimestamp & { contextTime?: Seconds; performanceTime?: PerformanceTimestamp };
 	}
 
 	interface AudioData {
@@ -99,6 +130,21 @@ declare global {
 
 	interface Location {
 		toString(): AbsoluteUrl;
+	}
+	interface HTMLCanvasElement {
+		// "data:," for a canvas with no pixels, which is still a data URL.
+		toDataURL(type?: string, quality?: number): DataUrl;
+	}
+
+	// TypeScript 5 declares HeadersIterator and these methods only in the dom.iterable lib, but
+	// every browser has them. Iteration lowercases the names.
+	interface HeadersIterator<T> extends IteratorObject<T, BuiltinIteratorReturn, unknown> {
+		[Symbol.iterator](): HeadersIterator<T>;
+	}
+	interface Headers {
+		[Symbol.iterator](): HeadersIterator<[LowercaseHeaderName, string]>;
+		entries(): HeadersIterator<[LowercaseHeaderName, string]>;
+		keys(): HeadersIterator<LowercaseHeaderName>;
 	}
 	interface ImportMeta {
 		resolve(specifier: string): AbsoluteUrl;
