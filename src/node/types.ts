@@ -1,4 +1,4 @@
-// Helper types for the node entries. Not exported from the package.
+// Helper types for the node entries, exported from the package only so declaration emit can name them.
 
 import type { LookupAddress, SoaRecord } from "node:dns";
 import type { Stats, StatsFs } from "node:fs";

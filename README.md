@@ -32,6 +32,8 @@ In the spirit of [`@total-typescript/ts-reset`](https://github.com/total-typescr
 npm i -D @all1ndev/branded-builtins
 ```
 
+A library whose published declaration files infer branded types imports them from this package, so it needs it in `dependencies` instead.
+
 ## Setup
 
 Add one ES entry matching your `lib`, plus one entry per host, to `tsconfig.json`:

@@ -70,14 +70,15 @@ declare global {
 		resolve(specifier: string, parent?: string | URL): AbsoluteUrl;
 	}
 
-	// fetch bodies decode as UTF-8 with replacement. undici declares `text` as a property, which
-	// these global interfaces override with a method.
-	interface Response {
-		text(): Promise<WellFormedString>;
-	}
-	interface Request {
-		text(): Promise<WellFormedString>;
-	}
+	// fetch bodies decode as UTF-8 with replacement. undici declares `text` as a property, so branding
+	// the global Response would reject undici's own instances: only fetch()'s result is branded, with
+	// the brand listed first in the intersection so its `text` wins. The original is restated last,
+	// as for Math.floor in es2024.
+	function fetch(
+		input: string | URL | Request,
+		init?: RequestInit,
+	): Promise<{ text(): Promise<WellFormedString> } & Response>;
+	function fetch(input: string | URL | Request, init?: RequestInit): Promise<Response>;
 
 	namespace NodeJS {
 		interface Process {

@@ -14,6 +14,7 @@ test/dom
 test/es2024
 test/esnext
 test/root
+test/declaration
 "
 for compiler in typescript typescript5; do
 	echo "$compiler $(node "node_modules/$compiler/bin/tsc" -v)"

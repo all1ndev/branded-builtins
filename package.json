@@ -44,6 +44,9 @@
 			],
 			"node26": [
 				"./dist/node26/index.d.ts"
+			],
+			"node/types": [
+				"./dist/node/types.d.ts"
 			]
 		}
 	},
@@ -71,6 +74,9 @@
 		},
 		"./node26": {
 			"types": "./dist/node26/index.d.ts"
+		},
+		"./node/types": {
+			"types": "./dist/node/types.d.ts"
 		}
 	},
 	"files": [

@@ -1,0 +1,7 @@
+{
+	"extends": "../tsconfig.json",
+	"compilerOptions": {
+		"declaration": true
+	},
+	"include": ["index.mts", "../../dist/node26/index.d.ts", "../../dist/es2024/index.d.ts"]
+}

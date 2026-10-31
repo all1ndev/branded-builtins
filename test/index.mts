@@ -407,7 +407,12 @@ encoded.read satisfies B.Bytes;
 	(await new NodeBlob([raw]).text()) satisfies B.WellFormedString;
 	(await new Blob([raw]).text()) satisfies B.WellFormedString;
 	(await (await fetch(raw)).text()) satisfies B.WellFormedString;
-	(await request.text()) satisfies B.WellFormedString;
+	// undici's own instances still satisfy the global types.
+	(await fetch(request)).clone() satisfies Response;
+	new Response(raw) satisfies Response;
+	Response.json({}) satisfies Response;
+	new Request(raw) satisfies Request;
+	new Response(raw) satisfies Awaited<ReturnType<typeof fetch>>;
 })();
 
 // URLs

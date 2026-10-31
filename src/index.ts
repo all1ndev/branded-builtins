@@ -5,7 +5,12 @@
 declare const brand: unique symbol;
 
 // A map of tags rather than a single tag, so brands can stack: a SafeInteger is also an Integer.
-type Brand<T, B extends string> = T & { readonly [brand]: { readonly [K in B]: true } };
+// A named interface, so declaration emit can still name a brand that an intersection has flattened,
+// as in `Stats & { size: Bytes }`.
+export interface BrandTags<B extends string> {
+	readonly [brand]: { readonly [K in B]: true };
+}
+type Brand<T, B extends string> = T & BrandTags<B>;
 
 /** A path that `path.isAbsolute()` accepts. */
 export type AbsolutePath = Brand<string, "AbsolutePath">;
