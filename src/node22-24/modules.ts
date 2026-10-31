@@ -92,11 +92,17 @@ import type {
 declare module "path" {
 	interface PlatformPath {
 		resolve(...paths: string[]): AbsolutePath;
+		// Each original is restated last, as for Math.floor in es2024.
 		join(path: AbsolutePath, ...paths: string[]): AbsolutePath;
+		join(...paths: string[]): string;
 		normalize(path: AbsolutePath): AbsolutePath;
+		normalize(path: string): string;
 		dirname(path: AbsolutePath): AbsolutePath;
+		dirname(path: string): string;
 		toNamespacedPath(path: AbsolutePath): AbsolutePath;
+		toNamespacedPath(path: string): string;
 		parse(path: AbsolutePath): ParsedPath & { root: AbsolutePath; dir: AbsolutePath };
+		parse(path: string): ParsedPath;
 		isAbsolute(path: string): path is AbsolutePath;
 	}
 }
@@ -131,6 +137,8 @@ declare module "child_process" {
 		command: string,
 		options: ExecSyncOptions & { encoding: E },
 	): Encoded<E>;
+	// Restated last for reflection, as for Math.floor in es2024; `this: never` keeps calls off it.
+	function execSync(this: never, command: string, options?: ExecSyncOptions): string | NonSharedBuffer;
 	function execFileSync<E extends TextEncoding | BinaryEncoding>(
 		file: string,
 		options: ExecFileSyncOptions & { encoding: E },
@@ -179,6 +187,12 @@ declare module "fs" {
 		path: PathOrFileDescriptor,
 		options: E | { encoding: E; flag?: string | undefined },
 	): Encoded<E>;
+	// Restated last for reflection, as for Math.floor in es2024; `this: never` keeps calls off it.
+	function readFileSync(
+		this: never,
+		path: PathOrFileDescriptor,
+		options?: (ObjectEncodingOptions & { flag?: string | undefined }) | BufferEncoding | null,
+	): string | NonSharedBuffer;
 
 	function readSync(
 		fd: number,
@@ -207,6 +221,8 @@ declare module "fs" {
 			options?: StatSyncOptions & { bigint?: false | undefined; throwIfNoEntry: false },
 		): BrandedStats | undefined;
 		(path: PathLike, options?: StatSyncOptions & { bigint?: false | undefined }): BrandedStats;
+		// Restated last for reflection, as for Math.floor in es2024; `this: never` keeps calls off it.
+		(this: never, path: PathLike, options?: StatSyncOptions): Stats | BigIntStats | undefined;
 	}
 	function fstatSync(fd: number, options?: StatOptions & { bigint?: false | undefined }): BrandedStats;
 	function statfsSync(path: PathLike, options?: StatFsOptions & { bigint?: false | undefined }): BrandedStatsFs;
@@ -300,8 +316,9 @@ declare module "os" {
 	function cpus(): (CpuInfo & {
 		times: { user: Milliseconds; nice: Milliseconds; sys: Milliseconds; idle: Milliseconds; irq: Milliseconds };
 	})[];
+	// Other encodings ("hex", "utf16le") don't give a path, like PathEncodingOption.
 	function userInfo(
-		options?: UserInfoOptionsWithStringEncoding,
+		options?: UserInfoOptionsWithStringEncoding & { encoding?: TextEncoding | undefined },
 	): UserInfo<string> & { uid: Uid; gid: Gid; homedir: AbsolutePath };
 	function networkInterfaces(): NodeJS.Dict<
 		(
@@ -347,7 +364,6 @@ declare module "crypto" {
 	}
 	interface ECDH {
 		generateKeys<E extends BinaryEncoding>(encoding: E, format?: ECDHKeyFormat): Encoded<E>;
-		computeSecret<E extends BinaryEncoding>(otherPublicKey: NodeJS.ArrayBufferView, outputEncoding: E): Encoded<E>;
 		computeSecret<E extends BinaryEncoding>(
 			otherPublicKey: string,
 			inputEncoding: BinaryToTextEncoding,
@@ -371,6 +387,13 @@ declare module "crypto" {
 	function hash(algorithm: string, data: BinaryLike, options?: "hex"): Hex;
 	function hash(algorithm: string, data: BinaryLike, options: "base64"): Base64;
 	function hash(algorithm: string, data: BinaryLike, options: "base64url"): Base64Url;
+	// Restated last for reflection, as for Math.floor in es2024; `this: never` keeps calls off it.
+	function hash(
+		this: never,
+		algorithm: string,
+		data: BinaryLike,
+		outputEncoding?: BinaryToTextEncoding | "buffer",
+	): string | NonSharedBuffer;
 	function randomUUID(options?: RandomUUIDOptions): BrandedUUID;
 	// Node requires max - min < 2 ** 48, so the result is always safe.
 	function randomInt(max: number): SafeInteger;

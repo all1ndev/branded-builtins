@@ -28,10 +28,11 @@ ES entries build on each other in a chain, because ES and web APIs are never rem
 
 1. Add the brand type to `src/index.ts`.
 2. Add the overload where every version that has the API loads it. For Node, that's usually `src/node/modules.ts` (or `globals.ts`) plus `src/node22-24/modules.ts`, with the module named as each layout declares it.
-3. Add only APIs the entry's `lib` or `@types/node` already declares. An overload for a missing method silently creates it.
-4. Add a `satisfies` line to the tests, and a `@ts-expect-error` line for the plain case that must stay unbranded.
-5. If the brand claims a runtime fact (a path is absolute, a value is in kilobytes), check it in `test/runtime.mjs`.
-6. List it in `API.md`.
+3. If the overload takes narrower input than the original, restate the original's last signature after it, as for `Math.floor` or `fs.readFileSync`: TypeScript reads the last overload when a function is passed as a value or reflected with `ReturnType`.
+4. Add only APIs the entry's `lib` or `@types/node` already declares. An overload for a missing method silently creates it.
+5. Add a `satisfies` line to the tests, and a `@ts-expect-error` line for the plain case that must stay unbranded.
+6. If the brand claims a runtime fact (a path is absolute, a value is in kilobytes), check it in `test/runtime.mjs`.
+7. List it in `API.md`.
 
 ## Adding a Node version
 
@@ -39,4 +40,4 @@ ES entries build on each other in a chain, because ES and web APIs are never rem
 2. Create `src/nodeNN/index.ts` that loads `src/node/globals.ts` and `src/node/modules.ts`, plus its new APIs. The shared files always follow the newest version: if it changes or removes an API, update the shared overload and give the older entries their own copy of the old one.
 3. Add `src/nodeNN/tsconfig.json` with `typeRoots` pointing at `@typesNN`, and the project to `scripts/build.sh`.
 4. Add test projects for it to `scripts/test.sh`, and `@ts-expect-error` lines for any API the new version removed.
-5. Add the export to `package.json`, widen the `@types/node` peer range, and add the version to the CI matrix.
+5. Add the export and its `typesVersions` entry to `package.json`, widen the `@types/node` peer range, and add the version to the CI matrix.

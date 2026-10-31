@@ -1,0 +1,5 @@
+{
+	// The DOM lib without the /dom entry: lib.dom.d.ts must still type-check against the node entry.
+	"extends": "./tsconfig.json",
+	"include": ["../../dist/node26/index.d.ts", "../../dist/es2024/index.d.ts"]
+}

@@ -64,6 +64,9 @@ Math.round(finite) satisfies B.Integer;
 Math.trunc(finite) satisfies B.Integer;
 // @ts-expect-error Math.floor(Infinity) is Infinity
 Math.floor(num) satisfies B.Integer;
+// Passed as a value, the original signature applies.
+[num].map(Math.round) satisfies number[];
+Array.from([num], Math.trunc) satisfies number[];
 
 declare const date: Date;
 date.toUTCString() satisfies B.HttpDate;

@@ -4,6 +4,7 @@
 // and re-exports them from "fs": 26 and newer. If a version changes or drops an API, older
 // entries keep their own copy of the old overload.
 
+import type { TextDecodeOptions, TextEncoderEncodeIntoResult } from "node:util";
 import type {
 	AbsolutePath,
 	AbsoluteUrl,
@@ -95,11 +96,17 @@ import type {
 // @types/node 26 declares the functions of "node:path" in a namespace exported with `export =`.
 declare module "node:path" {
 	function resolve(...paths: string[]): AbsolutePath;
+	// Each original is restated last, as for Math.floor in es2024.
 	function join(path: AbsolutePath, ...paths: string[]): AbsolutePath;
+	function join(...paths: string[]): string;
 	function normalize(path: AbsolutePath): AbsolutePath;
+	function normalize(path: string): string;
 	function dirname(path: AbsolutePath): AbsolutePath;
+	function dirname(path: string): string;
 	function toNamespacedPath(path: AbsolutePath): AbsolutePath;
+	function toNamespacedPath(path: string): string;
 	function parse(path: AbsolutePath): ParsedPath & { root: AbsolutePath; dir: AbsolutePath };
+	function parse(path: string): ParsedPath;
 	function isAbsolute(path: string): path is AbsolutePath;
 }
 
@@ -135,6 +142,8 @@ declare module "node:child_process" {
 		command: string,
 		options: ExecSyncOptions & { encoding: E },
 	): Encoded<E>;
+	// Restated last for reflection, as for Math.floor in es2024; `this: never` keeps calls off it.
+	function execSync(this: never, command: string, options?: ExecSyncOptions): string | NonSharedBuffer;
 	function execFileSync<E extends TextEncoding | BinaryEncoding>(
 		file: string,
 		options: ExecFileSyncOptions & { encoding: E },
@@ -187,6 +196,12 @@ declare module "node:fs" {
 		path: PathOrFileDescriptor,
 		options: E | { encoding: E; flag?: string | undefined },
 	): Encoded<E>;
+	// Restated last for reflection, as for Math.floor in es2024; `this: never` keeps calls off it.
+	function readFileSync(
+		this: never,
+		path: PathOrFileDescriptor,
+		options: ReadFileSyncOptions,
+	): string | NonSharedBuffer;
 
 	function readSync(
 		fd: number,
@@ -216,6 +231,8 @@ declare module "node:fs" {
 		path: PathLike,
 		options: StatOptions & { bigint?: false | undefined; throwIfNoEntry: false },
 	): BrandedStats | undefined;
+	// Restated last for reflection, as for Math.floor in es2024; `this: never` keeps calls off it.
+	function statSync(this: never, path: PathLike, options?: StatOptions): Stats | BigIntStats | undefined;
 	function lstatSync(path: PathLike): BrandedStats;
 	function lstatSync(
 		path: PathLike,
@@ -225,6 +242,7 @@ declare module "node:fs" {
 		path: PathLike,
 		options: StatOptions & { bigint?: false | undefined; throwIfNoEntry: false },
 	): BrandedStats | undefined;
+	function lstatSync(this: never, path: PathLike, options?: StatOptions): Stats | BigIntStats | undefined;
 	function fstatSync(fd: number, options?: StatOptions & { bigint?: false | undefined }): BrandedStats;
 	function statfsSync(path: PathLike, options?: StatFsOptions & { bigint?: false | undefined }): BrandedStatsFs;
 }
@@ -325,8 +343,9 @@ declare module "node:os" {
 	function cpus(): (CpuInfo & {
 		times: { user: Milliseconds; nice: Milliseconds; sys: Milliseconds; idle: Milliseconds; irq: Milliseconds };
 	})[];
+	// Other encodings ("hex", "utf16le") don't give a path, like PathEncodingOption.
 	function userInfo(
-		options?: UserInfoOptionsWithStringEncoding,
+		options?: UserInfoOptionsWithStringEncoding & { encoding?: TextEncoding | undefined },
 	): UserInfo<string> & { uid: Uid; gid: Gid; homedir: AbsolutePath };
 	function networkInterfaces(): NodeJS.Dict<
 		(
@@ -408,6 +427,13 @@ declare module "node:crypto" {
 	function hash(algorithm: string, data: BinaryLike, options?: "hex"): Hex;
 	function hash(algorithm: string, data: BinaryLike, options: "base64"): Base64;
 	function hash(algorithm: string, data: BinaryLike, options: "base64url"): Base64Url;
+	// Restated last for reflection, as for Math.floor in es2024; `this: never` keeps calls off it.
+	function hash(
+		this: never,
+		algorithm: string,
+		data: BinaryLike,
+		options: OneShotDigestOptions | BufferEncoding | "buffer",
+	): string | NonSharedBuffer;
 	function randomUUID(options?: RandomUUIDOptions): BrandedUUID;
 	// Node requires max - min < 2 ** 48, so the result is always safe.
 	function randomInt(max: number): SafeInteger;
@@ -534,6 +560,17 @@ declare module "node:util" {
 	}
 	interface TextEncoder {
 		// `read` counts UTF-16 code units, so it stays a plain number.
+		encodeInto(source: string, destination: Uint8Array): TextEncoderEncodeIntoResult & { written: Bytes };
+	}
+}
+
+// @types/node 26 declares the global TextDecoder and TextEncoder as extending util's, so they need the
+// same overloads: otherwise the DOM lib's declarations of them no longer match their base.
+declare global {
+	interface TextDecoder {
+		decode(input?: NodeJS.AllowSharedBufferSource, options?: TextDecodeOptions): WellFormedString;
+	}
+	interface TextEncoder {
 		encodeInto(source: string, destination: Uint8Array): TextEncoderEncodeIntoResult & { written: Bytes };
 	}
 }

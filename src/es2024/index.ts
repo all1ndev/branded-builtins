@@ -105,11 +105,17 @@ declare global {
 	}
 
 	// Only for Finite input: Math.floor(Infinity) is Infinity and Math.floor(NaN) is NaN.
+	// Each original signature is restated last, because TypeScript reads the last overload when a
+	// function is passed as a value or reflected with ReturnType or Parameters.
 	interface Math {
 		floor(x: Finite): Integer;
+		floor(x: number): number;
 		ceil(x: Finite): Integer;
+		ceil(x: number): number;
 		round(x: Finite): Integer;
+		round(x: number): number;
 		trunc(x: Finite): Integer;
+		trunc(x: number): number;
 		// Both convert their arguments to 32-bit integers, so even NaN gives an integer.
 		clz32(x: number): SafeInteger;
 		imul(x: number, y: number): SafeInteger;

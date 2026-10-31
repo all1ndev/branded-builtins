@@ -8,6 +8,7 @@ test/tsconfig.node22.json
 test/node-dom
 test/node-dom/tsconfig.node24.json
 test/node-dom/tsconfig.node22.json
+test/node-dom/tsconfig.no-dom-entry.json
 test/ts-reset
 test/dom
 test/es2024

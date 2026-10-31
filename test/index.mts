@@ -6,6 +6,7 @@ import fsp from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { findPackageJSON, getCompileCacheDir } from "node:module";
 import crypto from "node:crypto";
+import { execSync } from "node:child_process";
 import { performance as perf } from "node:perf_hooks";
 import net from "node:net";
 import dns from "node:dns";
@@ -63,6 +64,19 @@ path.normalize(raw) satisfies B.AbsolutePath;
 path.dirname(raw) satisfies B.AbsolutePath;
 // @ts-expect-error
 path.relative(abs, abs) satisfies B.AbsolutePath;
+
+// Passed as a value or reflected, the original signature applies.
+[raw].map(path.dirname) satisfies string[];
+[raw].map(path.parse) satisfies path.ParsedPath[];
+[raw] satisfies Parameters<typeof path.join>;
+Buffer.from(raw) satisfies ReturnType<typeof fs.readFileSync>;
+undefined satisfies ReturnType<typeof fs.statSync>;
+Buffer.from(raw) satisfies ReturnType<typeof crypto.hash>;
+Buffer.from(raw) satisfies ReturnType<typeof execSync>;
+// Calls still resolve to the original overloads.
+fs.readFileSync(raw) satisfies Buffer;
+fs.statSync(raw) satisfies fs.Stats;
+execSync(raw) satisfies Buffer;
 // @ts-expect-error
 fs.mkdtempSync(raw) satisfies B.AbsolutePath;
 
@@ -183,6 +197,9 @@ user.username satisfies string;
 // @ts-expect-error
 user.uid satisfies B.Gid;
 os.userInfo({ encoding: "buffer" }).homedir satisfies Buffer;
+os.userInfo({ encoding: "latin1" }).homedir satisfies B.AbsolutePath;
+// @ts-expect-error hex-encoded, not a path
+os.userInfo({ encoding: "hex" }).homedir satisfies B.AbsolutePath;
 
 // Stats
 const st = fs.statSync(raw);
@@ -427,6 +444,8 @@ ecdh.generateKeys("base64") satisfies B.Base64;
 ecdh.getPublicKey("hex", "compressed") satisfies B.Hex;
 ecdh.getPrivateKey("base64url") satisfies B.Base64Url;
 ecdh.computeSecret(raw, "hex", "base64") satisfies B.Base64;
+// @ts-expect-error "hex" is the input encoding here, which Node ignores for a buffer
+ecdh.computeSecret(buf, "hex") satisfies B.Hex;
 ecdh.getPublicKey() satisfies Buffer;
 const dh = crypto.createDiffieHellman(512);
 dh.getPrime("hex") satisfies B.Hex;
