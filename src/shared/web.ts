@@ -1,15 +1,9 @@
 // Web API augmentations shared by the dom and node entries: both the DOM lib and @types/node
 // declare these globals. Anything DOM-only belongs in dom/index.ts.
 
-import type { AbsoluteUrl, Base64, FormUrlEncoded, PerformanceTimestamp, UUID, WellFormedString } from "../index.ts";
+import type { AbsoluteUrl, Base64, FormUrlEncoded, WellFormedString } from "../index.ts";
 
 declare global {
-	interface Crypto {
-		randomUUID(): UUID;
-	}
-	interface Performance {
-		now(): PerformanceTimestamp;
-	}
 	interface URL {
 		toString(): AbsoluteUrl;
 		toJSON(): AbsoluteUrl;

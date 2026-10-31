@@ -47,3 +47,8 @@ Temporal.Now.zonedDateTimeISO().toString({ offset: "never", timeZoneName: "never
 // @ts-expect-error
 Temporal.Now.instant().toString() satisfies B.IsoUtcString;
 new Intl.DurationFormat().resolvedOptions().locale satisfies B.LanguageTag;
+
+// Passed as a value or reflected, the original signatures apply.
+"" satisfies ReturnType<Temporal.Instant["toString"]>;
+0 satisfies ReturnType<Temporal.Duration["total"]>;
+"" satisfies ReturnType<Uint8Array["toBase64"]>;

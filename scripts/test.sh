@@ -25,3 +25,4 @@ for compiler in typescript typescript5; do
 	done
 done
 node test/runtime.mjs
+node test/overloads.mjs

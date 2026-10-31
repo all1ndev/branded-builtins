@@ -53,7 +53,7 @@ Add one ES entry matching your `lib`, plus one entry per host, to `tsconfig.json
 | `/dom`                          | You use `lib: ["dom"]`.           |
 | `/node22`, `/node24`, `/node26` | You use that `@types/node` major. |
 
-A Node project that also loads the DOM lib should add `/dom` too, since `performance` and `crypto` then take DOM types. The root entry only exports the brand types and changes nothing on its own.
+A Node project that also loads the DOM lib should add `/dom` too, since `performance` and `crypto` then take DOM types. Keep `node` before the entries, as above: an overload declared later wins, so `node` after `/dom` would override its `btoa()` and `atob()`. The root entry only exports the brand types and changes nothing on its own.
 
 Pick the ES entry for your `lib`, or for your `target` when `lib` isn't set:
 
@@ -91,6 +91,10 @@ Each entry adds overloads to the built-in declarations through declaration mergi
 - **Arithmetic drops brands.** `performance.now() - start` is a plain `number`.
 - **Brands mark the unit, not validity.** `Date.parse("nope")` is still an `EpochMilliseconds` (`NaN`).
 - **An original overload with a literal parameter wins.** TypeScript tries overloads whose parameters are literal types first, in declaration order, so the original `dns.promises.resolve(host, "SOA")` and `tlsSocket.getPeerCertificate()` stay plain. Their siblings `resolveSoa()` and `getCertificate()` are branded.
+- **Values from the host's configuration are only as valid as that configuration.** Node doesn't check `HOME`, `TMPDIR` or `NODE_PATH`, so `os.homedir()`, `os.tmpdir()` and `require.resolve.paths()` can be relative when they are. A default `resolvedOptions().timeZone` or `.locale`, and `Temporal.Now.timeZoneId()`, follow `TZ` and `LANG`: an unset or invalid `TZ` gives `Etc/Unknown`, which `Intl` and Temporal reject, or `undefined`.
+- **`AbsolutePath` is absolute in the path flavor that made it.** `path.win32` on POSIX, or `path.posix` on Windows, gives paths the host's `path.isAbsolute()` rejects.
+- **Replacing a branded method takes the brand.** A stub, override or polyfill must return the branded type, `Date.now = () => 1234 as EpochMilliseconds`, and so must a mock typed from the method: `vi.spyOn(Date, "now").mockReturnValue(0 as EpochMilliseconds)`.
+- **Type predicates narrow through `every()` and `filter()`.** After `ids.every(Number.isInteger)`, `ids` is an `Integer[]` and won't take a plain number. An assertion such as `http.validateHeaderName()` must be called through a name with an explicit type, as TypeScript requires for every assertion function.
 - **Properties can't be branded.** Declaration merging can't change a property's type, so `process.pid`, `import.meta.dirname` and `performance.timeOrigin` stay plain. Fields are branded only on objects an API returns.
 
 ## Compatibility

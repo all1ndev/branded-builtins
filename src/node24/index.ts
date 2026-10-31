@@ -7,6 +7,7 @@
 import type { AbsolutePath, Json, WellFormedString } from "../index.ts";
 // Inside `declare module "crypto"`, `UUID` means crypto's own type.
 import type { UUID as BrandedUUID } from "../index.ts";
+import type { EncodingOption, PathLike } from "node:fs";
 import type { ReadableStream } from "node:stream/web";
 import type {
 	BinaryEncoding,
@@ -30,6 +31,7 @@ declare module "fs" {
 		prefix: AbsolutePath,
 		options?: PathEncodingOption,
 	): DisposableTempDir & { path: AbsolutePath };
+	function mkdtempDisposableSync(prefix: string, options?: EncodingOption): DisposableTempDir;
 }
 
 declare module "fs/promises" {
@@ -37,6 +39,7 @@ declare module "fs/promises" {
 		prefix: AbsolutePath,
 		options?: PathEncodingOption,
 	): Promise<DisposableTempDir & { path: AbsolutePath }>;
+	function mkdtempDisposable(prefix: PathLike, options?: EncodingOption): Promise<DisposableTempDir>;
 }
 
 declare module "buffer" {
@@ -60,7 +63,9 @@ declare module "crypto" {
 			inputEncoding: Encoding | undefined,
 			outputEncoding: E,
 		): Encoded<E>;
+		update(this: never, data: string, inputEncoding: Encoding | undefined, outputEncoding: Encoding): string;
 		final<E extends BinaryEncoding>(outputEncoding: E): Encoded<E>;
+		final(this: never, outputEncoding: BufferEncoding): string;
 	}
 	interface Decipheriv {
 		update<E extends BinaryEncoding>(
@@ -73,7 +78,9 @@ declare module "crypto" {
 			inputEncoding: Encoding | undefined,
 			outputEncoding: E,
 		): Encoded<E>;
+		update(this: never, data: string, inputEncoding: Encoding | undefined, outputEncoding: Encoding): string;
 		final<E extends BinaryEncoding>(outputEncoding: E): Encoded<E>;
+		final(this: never, outputEncoding: BufferEncoding): string;
 	}
 }
 

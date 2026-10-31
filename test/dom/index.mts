@@ -7,6 +7,8 @@ crypto.randomUUID() satisfies B.UUID;
 performance.now() satisfies B.PerformanceTimestamp;
 performance.mark("a").startTime satisfies B.PerformanceTimestamp;
 performance.measure("a", "b").duration satisfies B.Milliseconds;
+performance.measure("a").startTime satisfies B.PerformanceTimestamp;
+// @ts-expect-error mark "b" can carry a caller's start time
 performance.measure("a", { start: "b" }).startTime satisfies B.PerformanceTimestamp;
 performance.measure("a", { start: performance.now() }).startTime satisfies B.PerformanceTimestamp;
 performance.measure("a", { start: 0 }).duration satisfies B.Milliseconds;
@@ -29,13 +31,14 @@ performance.now() satisfies B.EpochMilliseconds;
 
 declare const bytes: Uint8Array;
 declare const blob: Blob;
+// @ts-expect-error a mark can carry a caller's start time
 performance.getEntries()[0]?.startTime satisfies B.PerformanceTimestamp | undefined;
 performance.getEntriesByName(raw)[0]?.duration satisfies B.Milliseconds | undefined;
-performance.getEntriesByType("mark")[0]?.startTime satisfies B.PerformanceTimestamp | undefined;
+performance.getEntriesByType("resource")[0]?.startTime satisfies B.PerformanceTimestamp | undefined;
 declare const entryList: PerformanceObserverEntryList;
 entryList.getEntries()[0]?.duration satisfies B.Milliseconds | undefined;
 declare const observer: PerformanceObserver;
-observer.takeRecords()[0]?.startTime satisfies B.PerformanceTimestamp | undefined;
+observer.takeRecords()[0]?.duration satisfies B.Milliseconds | undefined;
 declare const deadline: IdleDeadline;
 deadline.timeRemaining() satisfies B.Milliseconds;
 declare const video: HTMLVideoElement;

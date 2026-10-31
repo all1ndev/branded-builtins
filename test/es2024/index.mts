@@ -148,3 +148,12 @@ raw.codePointAt(0) satisfies B.SafeInteger | undefined;
 raw.charCodeAt(0) satisfies B.SafeInteger;
 // @ts-expect-error -1 for a missing item
 items.indexOf(1) satisfies B.Uint32;
+
+// Arrays of branded values can be searched for plain ones.
+Intl.supportedValuesOf("timeZone").includes(raw) satisfies boolean;
+Intl.getCanonicalLocales(raw).indexOf(raw) satisfies B.SafeInteger;
+declare const integers: readonly B.Integer[];
+integers.lastIndexOf(1.5) satisfies B.SafeInteger;
+declare const letters: ("a" | "b")[];
+// @ts-expect-error unbranded element types stay exact
+letters.includes("c");

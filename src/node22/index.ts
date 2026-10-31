@@ -21,7 +21,9 @@ declare module "crypto" {
 			inputEncoding: Encoding | undefined,
 			outputEncoding: E,
 		): Encoded<E>;
+		update(this: never, data: string, inputEncoding: Encoding | undefined, outputEncoding: Encoding): string;
 		final<E extends BinaryEncoding>(outputEncoding: E): Encoded<E>;
+		final(this: never, outputEncoding: BufferEncoding): string;
 	}
 	interface Decipher {
 		update<E extends BinaryEncoding>(
@@ -34,7 +36,9 @@ declare module "crypto" {
 			inputEncoding: Encoding | undefined,
 			outputEncoding: E,
 		): Encoded<E>;
+		update(this: never, data: string, inputEncoding: Encoding | undefined, outputEncoding: Encoding): string;
 		final<E extends BinaryEncoding>(outputEncoding: E): Encoded<E>;
+		final(this: never, outputEncoding: BufferEncoding): string;
 	}
 }
 

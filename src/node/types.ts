@@ -55,13 +55,20 @@ export type BrandedLookupAddress = LookupAddress & { address: IPv4 | IPv6 };
 // others give code units up to 0xFF), and keeps ASCII as is, so a decoded path stays a path.
 export type TextEncoding = "utf8" | "utf-8" | "latin1" | "binary" | "ascii";
 export type BinaryEncoding = "hex" | "base64" | "base64url";
-export type Encoded<E extends TextEncoding | BinaryEncoding> = E extends "hex"
-	? Hex
-	: E extends "base64"
-		? Base64
-		: E extends "base64url"
-			? Base64Url
-			: WellFormedString;
+// An `any` encoding (or, without strictNullChecks, a null one) infers E as any, which says nothing about
+// the result, so it gets the API's unbranded one.
+export type Encoded<E extends TextEncoding | BinaryEncoding, Unbranded = string | NonSharedBuffer> =
+	IsAny<E> extends true
+		? Unbranded
+		: E extends "hex"
+			? Hex
+			: E extends "base64"
+				? Base64
+				: E extends "base64url"
+					? Base64Url
+					: WellFormedString;
+// The usual `0 extends 1 & T` check reduces to false for a type parameter with a literal constraint.
+type IsAny<T> = boolean extends (T extends never ? true : false) ? true : false;
 // Options of fs APIs that return a path. Other encodings ("hex", "utf16le") don't give a path.
 export type PathEncodingOption = TextEncoding | { encoding?: TextEncoding | null | undefined } | null | undefined;
 
@@ -104,25 +111,25 @@ export type BrandedChanges = StatementResultingChanges & {
 	lastInsertRowid: Integer | bigint;
 };
 
-export type BrandedPerformanceEntry = PerformanceEntry & {
-	readonly startTime: PerformanceTimestamp;
-	readonly duration: Milliseconds;
-};
+// A mark's start time is whatever number its caller passed, so only resource entries brand it.
+export type BrandedPerformanceEntry = PerformanceEntry & { readonly duration: Milliseconds };
 export type BrandedPerformanceResourceTiming = PerformanceResourceTiming &
 	BrandedPerformanceEntry & {
+		readonly startTime: PerformanceTimestamp;
 		readonly transferSize: Bytes;
 		readonly encodedBodySize: Bytes;
 		readonly decodedBodySize: Bytes;
 	};
 export type BrandedEventLoopUtilization = EventLoopUtilization & { idle: Milliseconds; active: Milliseconds };
 
-export type BrandedGCStatistics<T> = T & {
+// The branded part comes first: an intersection of arrays takes `map`, `at` and `find` from its first member.
+export type BrandedGCStatistics<T> = {
 	beforeGC: {
 		heapStatistics: SizesInBytes<HeapStatistics>;
 		heapSpaceStatistics: SizesInBytes<HeapSpaceStatistics>[];
 	};
 	afterGC: { heapStatistics: SizesInBytes<HeapStatistics>; heapSpaceStatistics: SizesInBytes<HeapSpaceStatistics>[] };
-};
+} & T;
 
 // RFC 9113 counts these settings in octets.
 export type BrandedSettings = Settings & {

@@ -89,7 +89,7 @@ export type AbsoluteUrl = Brand<string, "AbsoluteUrl">;
 export type DataUrl = Brand<string, "AbsoluteUrl" | "DataUrl">;
 /** An exact time in UTC that `Temporal.Instant.from()` accepts: `2026-01-01T12:00:00Z`. */
 export type IsoInstant = Brand<string, "IsoInstant">;
-/** Output of `Date#toISOString()`: `YYYY-MM-DDTHH:mm:ss.sssZ`. Also an `IsoInstant`. */
+/** Output of `Date#toISOString()`: `YYYY-MM-DDTHH:mm:ss.sssZ`, or `±YYYYYY-…` outside years 0–9999. Also an `IsoInstant`. */
 export type IsoUtcString = Brand<string, "IsoInstant" | "IsoUtcString">;
 /** A calendar date: `2026-01-01`, with a `[u-ca=…]` annotation for a non-ISO calendar. */
 export type IsoDate = Brand<string, "IsoDate">;
@@ -105,7 +105,7 @@ export type IsoDuration = Brand<string, "IsoDuration">;
 export type WellFormedString = Brand<string, "WellFormedString">;
 /** Output of `RegExp.escape()`: a pattern that matches the escaped string literally. */
 export type RegExpSource = Brand<string, "RegExpSource">;
-/** Output of `Date#toUTCString()`, the HTTP date format: `Www, DD Mmm YYYY HH:mm:ss GMT`. */
+/** Output of `Date#toUTCString()`: `Www, DD Mmm YYYY HH:mm:ss GMT`, the HTTP date format for years 0–9999. */
 export type HttpDate = Brand<string, "HttpDate">;
 /** Output of `CSS.escape()`: an identifier that matches the escaped string literally in a selector. */
 export type CssIdentifier = Brand<string, "CssIdentifier">;
@@ -118,11 +118,11 @@ export type NfkcString = Brand<string, "NfkcString">;
 /** Output of `String#normalize("NFKD")`. */
 export type NfkdString = Brand<string, "NfkdString">;
 
-/** A canonicalized Unicode BCP 47 locale identifier, as `Intl.getCanonicalLocales()` returns. */
+/** A Unicode BCP 47 locale identifier, as `Intl.getCanonicalLocales()` returns. One read from the host's configuration can be invalid. */
 export type LanguageTag = Brand<string, "LanguageTag">;
 /** An ISO 4217 currency code in uppercase: `USD`. */
 export type CurrencyCode = Brand<string, "CurrencyCode">;
-/** A time zone identifier that `Intl.DateTimeFormat` and Temporal accept: an IANA name or a UTC offset. */
+/** A time zone identifier: an IANA name or a UTC offset. One read from the host's configuration can be invalid. */
 export type TimeZoneId = Brand<string, "TimeZoneId">;
 
 /** A number that is not NaN or ±Infinity. */

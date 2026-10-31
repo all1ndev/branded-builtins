@@ -1,8 +1,9 @@
 {
 	"extends": "../../tsconfig.base.json",
+	// TypeScript 5 declares Headers#values() only in dom.iterable.
 	"compilerOptions": {
 		"types": [],
-		"lib": ["es2024", "dom"]
+		"lib": ["es2024", "dom", "dom.iterable"]
 	},
 	"include": ["index.mts", "../../dist/dom/index.d.ts", "../../dist/es2024/index.d.ts"]
 }

@@ -9,10 +9,7 @@ import type {
 	AbsoluteUrl,
 	AsyncId,
 	Base64,
-	Base64Url,
-	BigIntNanoseconds,
 	Bytes,
-	Hex,
 	Kilobytes,
 	FileMode,
 	Microseconds,
@@ -21,15 +18,18 @@ import type {
 	Seconds,
 	WellFormedString,
 } from "../index.ts";
-import type { TextEncoding } from "./types.ts";
+import type { BinaryEncoding, Encoded, TextEncoding } from "./types.ts";
 
 declare global {
 	interface Buffer {
-		toString(encoding: "hex", start?: number, end?: number): Hex;
-		toString(encoding: "base64", start?: number, end?: number): Base64;
-		toString(encoding: "base64url", start?: number, end?: number): Base64Url;
+		toString<E extends BinaryEncoding | TextEncoding>(
+			encoding: E,
+			start?: number,
+			end?: number,
+		): Encoded<E, string>;
 		// UTF-8 decoding replaces invalid input with U+FFFD; "utf16le" can give lone surrogates.
 		toString(encoding?: TextEncoding, start?: number, end?: number): WellFormedString;
+		toString(encoding?: BufferEncoding, start?: number, end?: number): string;
 		// At most 6 bytes, so below 2 ** 48.
 		readUIntLE(offset: number, byteLength: number): SafeInteger;
 		readUintLE(offset: number, byteLength: number): SafeInteger;
@@ -97,9 +97,10 @@ declare global {
 				maxRSS: Kilobytes;
 			};
 		}
+		// Without a previous time, hrtime() is a reading from an arbitrary point, not a duration.
 		interface HRTime {
-			(time?: [number, number]): [Seconds, Nanoseconds];
-			bigint(): BigIntNanoseconds;
+			(time: [number, number]): [Seconds, Nanoseconds];
+			(time?: [number, number]): [number, number];
 		}
 		interface MemoryUsageFn {
 			(): { [K in keyof MemoryUsage]: Bytes };

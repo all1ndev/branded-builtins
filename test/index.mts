@@ -26,6 +26,9 @@ path.win32.resolve(raw) satisfies B.AbsolutePath;
 os.homedir() satisfies B.AbsolutePath;
 os.tmpdir() satisfies B.AbsolutePath;
 fileURLToPath(import.meta.url) satisfies B.AbsolutePath;
+fileURLToPath(import.meta.url, { windows: false }) satisfies B.AbsolutePath;
+// @ts-expect-error a Windows path isn't absolute on POSIX
+fileURLToPath(import.meta.url, { windows: true }) satisfies B.AbsolutePath;
 process.cwd() satisfies B.AbsolutePath;
 findPackageJSON(raw) satisfies B.AbsolutePath | undefined;
 getCompileCacheDir() satisfies B.AbsolutePath | undefined;
@@ -94,8 +97,8 @@ if (net.isIPv6(raw)) raw satisfies B.IPv6;
 const fd = fs.openSync(raw, "r");
 fd satisfies B.FileDescriptor;
 fs.closeSync(fd);
-// @ts-expect-error
-fs.closeSync(1) satisfies B.FileDescriptor;
+// @ts-expect-error a plain number isn't a FileDescriptor
+1 as number satisfies B.FileDescriptor;
 
 // Encodings
 const buf = Buffer.from(raw);
@@ -137,9 +140,12 @@ performance.now() satisfies B.PerformanceTimestamp;
 perf.now() satisfies B.PerformanceTimestamp;
 process.uptime() satisfies B.Seconds;
 os.uptime() satisfies B.Seconds;
-process.hrtime.bigint() satisfies B.BigIntNanoseconds;
+const hrStart = process.hrtime();
+process.hrtime(hrStart) satisfies [B.Seconds, B.Nanoseconds];
+// @ts-expect-error a reading from an arbitrary point, not a duration
 process.hrtime()[0] satisfies B.Seconds;
-process.hrtime(process.hrtime()) satisfies [B.Seconds, number];
+// @ts-expect-error
+process.hrtime.bigint() satisfies B.BigIntNanoseconds;
 // @ts-expect-error
 os.uptime() satisfies B.Milliseconds;
 
@@ -246,7 +252,11 @@ req.resolve.paths(raw) satisfies B.AbsolutePath[] | null;
 // Performance entries
 perf.mark("a").startTime satisfies B.PerformanceTimestamp;
 perf.measure("a", "b").duration satisfies B.Milliseconds;
+perf.measure("a").startTime satisfies B.PerformanceTimestamp;
+// @ts-expect-error mark "b" can carry a caller's start time
 perf.measure("a", { start: "b" }).startTime satisfies B.PerformanceTimestamp;
+// @ts-expect-error
+perf.measure("a", "b").startTime satisfies B.PerformanceTimestamp;
 perf.measure("a", { start: perf.now() }).startTime satisfies B.PerformanceTimestamp;
 perf.measure("a", { start: 0 }).duration satisfies B.Milliseconds;
 // @ts-expect-error a plain start time is the caller's number
@@ -254,15 +264,16 @@ perf.measure("a", { start: 0 }).startTime satisfies B.PerformanceTimestamp;
 perf.mark("a", { startTime: perf.now() }).startTime satisfies B.PerformanceTimestamp;
 // @ts-expect-error
 perf.mark("a", { startTime: 0 }).startTime satisfies B.PerformanceTimestamp;
+// @ts-expect-error a mark can carry a caller's start time
 perf.getEntries()[0]?.startTime satisfies B.PerformanceTimestamp | undefined;
 perf.getEntriesByName(raw)[0]?.duration satisfies B.Milliseconds | undefined;
-perf.getEntriesByType("mark")[0]?.startTime satisfies B.PerformanceTimestamp | undefined;
+perf.getEntriesByType("mark")[0]?.duration satisfies B.Milliseconds | undefined;
 perf.getEntriesByType("resource")[0]?.transferSize satisfies B.Bytes | undefined;
 perf.getEntriesByType("resource")[0]?.startTime satisfies B.PerformanceTimestamp | undefined;
 declare const entryList: PerformanceObserverEntryList;
 entryList.getEntries()[0]?.duration satisfies B.Milliseconds | undefined;
 entryList.getEntriesByType("resource")[0]?.decodedBodySize satisfies B.Bytes | undefined;
-new PerformanceObserver(() => {}).takeRecords()[0]?.startTime satisfies B.PerformanceTimestamp | undefined;
+new PerformanceObserver(() => {}).takeRecords()[0]?.duration satisfies B.Milliseconds | undefined;
 // @ts-expect-error
 perf.measure("a").duration satisfies B.PerformanceTimestamp;
 
@@ -437,8 +448,22 @@ for (const info of Object.values(os.networkInterfaces()).flat()) {
 process.threadCpuUsage().user satisfies B.Microseconds;
 process.umask() satisfies B.FileMode;
 process.umask(0o22) satisfies B.FileMode;
-process.hrtime()[1] satisfies B.Nanoseconds;
+process.hrtime(hrStart)[1] satisfies B.Nanoseconds;
 setTimeout(() => {}, 1)[Symbol.toPrimitive]() satisfies B.AsyncId;
+
+// An `any` encoding says nothing about the result, so it stays unbranded.
+declare const anyEncoding: any;
+buf.toString(anyEncoding) satisfies string;
+// @ts-expect-error
+buf.toString(anyEncoding) satisfies B.Hex;
+// @ts-expect-error
+fs.readFileSync(raw, anyEncoding) satisfies B.WellFormedString;
+// @ts-expect-error
+crypto.createHash("sha256").digest(anyEncoding) satisfies B.Hex;
+// @ts-expect-error
+crypto.hash("sha256", raw, anyEncoding) satisfies B.Hex;
+// @ts-expect-error
+execSync(raw, anyEncoding) satisfies B.WellFormedString;
 
 // crypto encodings
 declare const key: crypto.KeyObject;
@@ -508,12 +533,16 @@ gc.startTime satisfies B.EpochMilliseconds;
 gc.statistics[0]?.beforeGC.heapStatistics.usedHeapSize satisfies B.Bytes | undefined;
 gc.statistics[0]?.afterGC.heapSpaceStatistics[0]?.spaceSize satisfies B.Bytes | undefined;
 gc.statistics[0]?.gcType satisfies string | undefined;
+// Array methods keep the brands too.
+gc.statistics.map((s) => s.afterGC.heapSpaceStatistics.at(0)?.spaceSize) satisfies (B.Bytes | undefined)[];
+gc.statistics.find(() => true)?.beforeGC.heapStatistics.usedHeapSize satisfies B.Bytes | undefined;
 declare const worker: Worker;
 (async () => {
 	(await worker.cpuUsage()).user satisfies B.Microseconds;
 	(await worker.getHeapStatistics()).total_heap_size satisfies B.Bytes;
 	(await vm.measureMemory()).total.jsMemoryEstimate satisfies B.Bytes;
 	(await vm.measureMemory()).total.jsMemoryRange[1] satisfies B.Bytes;
+	(await vm.measureMemory()).total.jsMemoryRange.at(0) satisfies B.Bytes | undefined;
 })();
 
 // Integers
@@ -560,9 +589,11 @@ declare const clientRequest: http.ClientRequest;
 declare const h2res: http2.Http2ServerResponse;
 res.getHeaderNames() satisfies B.LowercaseHeaderName[];
 res.getHeaderNames() satisfies B.HeaderName[];
+res.getHeaderNames().includes("content-type") satisfies boolean;
 clientRequest.getRawHeaderNames() satisfies B.HeaderName[];
 // @ts-expect-error raw names keep their case
 clientRequest.getRawHeaderNames() satisfies B.LowercaseHeaderName[];
+// @ts-expect-error http2 doesn't check that names are tokens
 h2res.getHeaderNames() satisfies B.LowercaseHeaderName[];
 {
 	const name: string = raw;

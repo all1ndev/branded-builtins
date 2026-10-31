@@ -14,36 +14,41 @@ import type {
 	PerformanceTimestamp,
 	Seconds,
 	TimerId,
+	UUID,
 	WellFormedString,
 } from "../index.ts";
 
-type BrandedPerformanceEntry = PerformanceEntry & {
-	readonly startTime: PerformanceTimestamp;
-	readonly duration: Milliseconds;
-};
-type BrandedPerformanceResourceTiming = PerformanceResourceTiming &
+// Exported only so declaration emit can name them.
+// A mark's start time is whatever number its caller passed, so only resource entries brand it.
+export type BrandedPerformanceEntry = PerformanceEntry & { readonly duration: Milliseconds };
+export type BrandedPerformanceResourceTiming = PerformanceResourceTiming &
 	BrandedPerformanceEntry & {
+		readonly startTime: PerformanceTimestamp;
 		readonly transferSize: Bytes;
 		readonly encodedBodySize: Bytes;
 		readonly decodedBodySize: Bytes;
 	};
 
 declare global {
+	interface Crypto {
+		randomUUID(): UUID;
+	}
 	interface Performance {
+		now(): PerformanceTimestamp;
 		// A caller-supplied start time keeps the brand only if it already has it.
 		mark(
 			markName: string,
 			markOptions?: PerformanceMarkOptions & { startTime?: PerformanceTimestamp | undefined },
 		): PerformanceMark & { readonly startTime: PerformanceTimestamp };
+		mark(markName: string, markOptions?: PerformanceMarkOptions): PerformanceMark;
+		// A named start mark can carry a caller's start time, so only a measure from the time origin or
+		// from a branded start keeps startTime branded.
 		measure(
 			measureName: string,
-			startOrMeasureOptions?:
-				| string
-				| (PerformanceMeasureOptions & {
-						start?: string | PerformanceTimestamp | undefined;
-						end?: string | PerformanceTimestamp | undefined;
-				  }),
-			endMark?: string,
+		): PerformanceMeasure & { readonly startTime: PerformanceTimestamp; readonly duration: Milliseconds };
+		measure(
+			measureName: string,
+			measureOptions: PerformanceMeasureOptions & { start: PerformanceTimestamp },
 		): PerformanceMeasure & { readonly startTime: PerformanceTimestamp; readonly duration: Milliseconds };
 		measure(
 			measureName: string,

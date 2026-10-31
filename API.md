@@ -47,7 +47,7 @@ All brands are exported from the root entry: `import type { AbsolutePath } from 
 |           | `TimerId`, `AnimationFrameId`, `IdleCallbackId`                                      | A DOM timer, animation frame or idle callback handle                      |
 |           | `Pointer`                                                                            | A native memory address from `node:ffi`, as a `bigint`                    |
 | Locales   | `LanguageTag`                                                                        | A canonical BCP 47 locale identifier                                      |
-|           | `TimeZoneId`                                                                         | A time zone `Intl` and Temporal accept                                    |
+|           | `TimeZoneId`                                                                         | An IANA time zone name or UTC offset                                      |
 |           | `CurrencyCode`                                                                       | An uppercase ISO 4217 code: `USD`                                         |
 | Network   | `IPv4`, `IPv6`                                                                       | An IP address                                                             |
 |           | `Cidr`                                                                               | An IP address with a prefix length                                        |
@@ -84,7 +84,7 @@ Also loaded by `es2025` and `esnext`.
 | `Array#indexOf()`, `lastIndexOf()`, `findIndex()`, `findLastIndex()`, `push()`, `unshift()`, and the same search methods on `ReadonlyArray`                     | `SafeInteger`                                        |
 | `String#indexOf()`, `lastIndexOf()`, `search()` with a string or `RegExp`, `codePointAt()`                                                                      | `SafeInteger` (`\| undefined` for `codePointAt()`)   |
 
-The other formatters' `supportedLocalesOf()` stay plain: their constructors are anonymous types, which can't be augmented. Typed arrays and `Buffer` keep plain `indexOf()` results.
+The other formatters' `supportedLocalesOf()` stay plain: their constructors are anonymous types, which can't be augmented. Typed arrays and `Buffer` keep plain `indexOf()` results. `Array#includes()`, `indexOf()` and `lastIndexOf()` also take a plain value when the elements are branded, so `Intl.supportedValuesOf("timeZone").includes(zone)` accepts any string.
 
 `Date.parse()`, `Date#getTime()` and the setters return `NaN` for an invalid date, `Date#toUTCString()` returns `"Invalid Date"`, and `Date#toJSON()` returns `null`: the brand marks the unit or format, not validity. `Date#toISOString()` throws instead, so its brand always holds.
 
@@ -120,13 +120,18 @@ Needs TypeScript 7.
 | `performance.now()`                                                                                                                                                                         | `PerformanceTimestamp`                 |
 | `performance.mark().startTime`, `performance.measure().startTime`                                                                                                                           | `PerformanceTimestamp`                 |
 | `performance.measure().duration`                                                                                                                                                            | `Milliseconds`                         |
-| `performance.getEntries…()`, `PerformanceObserverEntryList#getEntries…()`, `PerformanceObserver#takeRecords()`: `.startTime`, `.duration`                                                   | `PerformanceTimestamp`, `Milliseconds` |
+| `performance.getEntries…()`, `PerformanceObserverEntryList#getEntries…()`, `PerformanceObserver#takeRecords()`: `.duration`, and `.startTime` of resource entries                           | `Milliseconds`, `PerformanceTimestamp` |
 | `IdleDeadline#timeRemaining()`                                                                                                                                                              | `Milliseconds`                         |
 | `TimeRanges#start()`, `end()` (`media.buffered`, `.played`, `.seekable`), `SVGAnimationElement#getCurrentTime()`, `getStartTime()`, `getSimpleDuration()`, `SVGSVGElement#getCurrentTime()` | `Seconds`                              |
 | `performance.getEntriesByType("resource")`, `PerformanceObserverEntryList#getEntriesByType("resource")`: `.transferSize`, `.encodedBodySize`, `.decodedBodySize`                            | `Bytes`                                |
 | `AudioContext#getOutputTimestamp()`: `.contextTime`, `.performanceTime`                                                                                                                     | `Seconds`, `PerformanceTimestamp`      |
 | `AudioData#allocationSize()`, `VideoFrame#allocationSize()`, `TextEncoder#encodeInto().written`, `navigator.storage.estimate()`: `.usage`, `.quota`                                         | `Bytes`                                |
 | `TextDecoder#decode()`, `Blob#text()`, `Response#text()`, `Request#text()`                                                                                                                  | `WellFormedString`                     |
+| `window.setTimeout()`, `setInterval()`, and the same worker methods                                                                                                                         | `TimerId`                              |
+| `requestAnimationFrame()`                                                                                                                                                                   | `AnimationFrameId`                     |
+| `requestIdleCallback()`                                                                                                                                                                     | `IdleCallbackId`                       |
+| `HTMLCanvasElement#toDataURL()`                                                                                                                                                             | `DataUrl`                              |
+| `Headers` iteration, `Headers#entries()`: names; `Headers#keys()`                                                                                                                           | `LowercaseHeaderName`                  |
 | `CSS.escape()`                                                                                                                                                                              | `CssIdentifier`                        |
 | `crypto.randomUUID()`                                                                                                                                                                       | `UUID`                                 |
 | `btoa()`                                                                                                                                                                                    | `Base64`                               |
@@ -134,7 +139,7 @@ Needs TypeScript 7.
 | `URL#toString()`, `URL#toJSON()`, `location.toString()`, `import.meta.resolve()`                                                                                                            | `AbsoluteUrl`                          |
 | `URLSearchParams#toString()`                                                                                                                                                                | `FormUrlEncoded`                       |
 
-`mark()` and `measure()` keep `startTime` branded only when a start time you pass is a `PerformanceTimestamp` (or a mark name). Given a plain number, `startTime` is that number, so only `measure().duration` stays branded.
+`mark()` keeps `startTime` branded only when a start time you pass is a `PerformanceTimestamp`, and `measure()` only when it starts at the time origin or at such a start time. Given a plain number, `startTime` is that number, and a mark name can carry one, so `getEntries…()` brand `startTime` only for resource entries and `measure()` otherwise brands only `duration`.
 
 The global `setTimeout()` and `setInterval()` stay plain: in a project that also loads `@types/node`, they may be Node's, which return a `Timeout` object. `crypto.subtle.exportKey("jwk")` stays plain, in the DOM and in Node, because its original overload has a literal parameter. `URL.createObjectURL()` stays plain because it's a static method.
 
@@ -202,12 +207,11 @@ Stats with `bigint: true` stay unbranded.
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------- |
 | `perf_hooks` `performance.now()`, `.mark().startTime`, `.measure().startTime`                                                                                                                                      | `PerformanceTimestamp`                 |
 | `perf_hooks` `performance.measure().duration`                                                                                                                                                                      | `Milliseconds`                         |
-| `perf_hooks` `performance.getEntries…()`, `PerformanceObserverEntryList#getEntries…()`, `PerformanceObserver#takeRecords()`: `.startTime`, `.duration`                                                             | `PerformanceTimestamp`, `Milliseconds` |
+| `perf_hooks` `performance.getEntries…()`, `PerformanceObserverEntryList#getEntries…()`, `PerformanceObserver#takeRecords()`: `.duration`, and `.startTime` of resource entries                                     | `Milliseconds`, `PerformanceTimestamp` |
 | The same with `"resource"`: `.transferSize`, `.encodedBodySize`, `.decodedBodySize`                                                                                                                                | `Bytes`                                |
 | `perf_hooks.eventLoopUtilization()`, `performance.eventLoopUtilization()`: `.idle`, `.active` (`node24`+)                                                                                                          | `Milliseconds`                         |
-| `process.uptime()`, `os.uptime()`, `process.hrtime()[0]`                                                                                                                                                           | `Seconds`                              |
-| `process.hrtime()[1]`                                                                                                                                                                                              | `Nanoseconds`                          |
-| `process.hrtime.bigint()`                                                                                                                                                                                          | `BigIntNanoseconds`                    |
+| `process.uptime()`, `os.uptime()`, `process.hrtime(time)[0]`                                                                                                                                                       | `Seconds`                              |
+| `process.hrtime(time)[1]`                                                                                                                                                                                          | `Nanoseconds`                          |
 | `os.cpus()[i].times` fields, `net.getDefaultAutoSelectFamilyAttemptTimeout()`                                                                                                                                      | `Milliseconds`                         |
 | `process.cpuUsage()`, `process.threadCpuUsage()`, `Worker#cpuUsage()`: `.user` / `.system`, `process.resourceUsage().userCPUTime` / `.systemCPUTime`                                                               | `Microseconds`                         |
 | `v8.GCProfiler#stop()`: `.startTime`, `.endTime`                                                                                                                                                                   | `EpochMilliseconds`                    |
@@ -220,13 +224,13 @@ Stats with `bigint: true` stay unbranded.
 | `process.resourceUsage().maxRSS`                                                                                                                                                                                   | `Kilobytes`                            |
 | `stream.getDefaultHighWaterMark(false)`, `getDefaultHighWaterMark(true)`                                                                                                                                           | `Bytes`, `Integer` (an object count)   |
 
-`mark()` and `measure()` keep `startTime` branded only when a start time you pass is a `PerformanceTimestamp` (or a mark name), as in `dom`.
+`mark()`, `measure()` and `getEntries…()` brand `startTime` as in `dom`.
 
 ### Numbers and identity
 
 | API                                                                                                                                                  | Returns             |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| `crypto.randomInt()`, `os.availableParallelism()`, `Buffer#readInt…()` / `readUInt…()`                                                               | `SafeInteger`       |
+| `crypto.randomInt()`, `os.availableParallelism()`, `Buffer#readInt…()` / `readUInt…()`, `node26` `ffi.getInt8/16/32()`, `getUint8/16()`              | `SafeInteger`       |
 | `zlib.crc32()`, `v8.cachedDataVersionTag()`, `node26` `ffi.getUint32()`                                                                              | `Uint32`            |
 | `sqlite` `StatementSync#run()` and in `node24`+ `SQLTagStore#run()`: `.changes`, `.lastInsertRowid`                                                  | `Integer \| bigint` |
 | `tty.WriteStream#getWindowSize()`, `node:test` `callCount()`, `accessCount()`, `dgram.Socket#getSendQueueCount()`, the `number_of_…` heap statistics | `Integer`           |
@@ -251,7 +255,7 @@ Stats with `bigint: true` stay unbranded.
 | `os.networkInterfaces()[name][i]`: `.mac`, `.cidr`                                                                                                                                                     | `MacAddress`, `Cidr \| null`          |
 | `net.Server#address()`, `net.Socket#address()`, `dgram.Socket#address()`, `dgram.Socket#remoteAddress()`, and in `node24`+ `net.BoundSocket#address()`, `dgram.Socket#bindSync()`: `.address`, `.port` | `IPv4 \| IPv6`, `Port`                |
 | `X509Certificate#checkIP()`                                                                                                                                                                            | `IPv4 \| IPv6 \| undefined`           |
-| `OutgoingMessage#getHeaderNames()` (`ServerResponse`, `ClientRequest`), `Http2ServerResponse#getHeaderNames()`                                                                                         | `LowercaseHeaderName[]`               |
+| `OutgoingMessage#getHeaderNames()` (`ServerResponse`, `ClientRequest`)                                                                                                                                 | `LowercaseHeaderName[]`               |
 | `ClientRequest#getRawHeaderNames()`                                                                                                                                                                    | `HeaderName[]`                        |
 | `http.validateHeaderName(name)`                                                                                                                                                                        | Assertion: `name is HeaderName`       |
 

@@ -71,7 +71,13 @@ assert.match(new Date(0).toISOString(), /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\
 assert.throws(() => new Date(NaN).toISOString(), RangeError);
 assert.equal("e\u0301".normalize(), "e\u0301".normalize("NFC"));
 assert.ok("a\ud800".toWellFormed().isWellFormed());
-assert.ok(Math.abs(new Date().getTimezoneOffset()) <= 14 * 60, "getTimezoneOffset is minutes");
+const now = new Date();
+const localAsUtc = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes());
+assert.equal(
+	now.getTimezoneOffset(),
+	(Math.floor(now.getTime() / 60_000) * 60_000 - localAsUtc) / 60_000,
+	"getTimezoneOffset is minutes",
+);
 assert.equal(new Date(0).setUTCHours(1), 3_600_000, "Date setters return epoch milliseconds");
 assert.match(new Date(0).toUTCString(), /^[A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} GMT$/);
 assert.ok(Number.isSafeInteger(Math.clz32(NaN)) && Number.isSafeInteger(Math.imul(NaN, 1.5)));
@@ -105,18 +111,21 @@ assert.ok(URL.canParse(new URL("../a?b#c", "https://example.com/x/y").toString()
 // Units.
 assert.ok(Math.abs(fs.statSync(".").mtimeMs - Date.now()) < 1e12, "mtimeMs is epoch milliseconds");
 const rssKilobytes = process.resourceUsage().maxRSS;
-assert.ok(rssKilobytes * 1024 >= process.memoryUsage.rss() / 4, "maxRSS is kilobytes");
+const rss = process.memoryUsage.rss();
+assert.ok(rssKilobytes * 1024 >= rss / 4 && rssKilobytes * 1024 <= rss * 64, "maxRSS is kilobytes");
 assert.equal(Buffer.alloc(4).write("é"), 2, "Buffer#write returns bytes");
 assert.equal(Buffer.from("é").copy(new Uint8Array(4)), 2, "Buffer#copy returns bytes");
 assert.ok(Number.isSafeInteger(randomInt(2 ** 47)));
-assert.ok(os.cpus()[0].times.idle <= os.uptime() * 1000 * 2, "cpus() times are milliseconds");
+const { idle } = os.cpus()[0].times;
+assert.ok(idle > os.uptime() * 10 && idle <= os.uptime() * 1000 * 2, "cpus() times are milliseconds");
 const cpu = process.cpuUsage();
-assert.ok(cpu.user > 1000, "cpuUsage is microseconds");
+const maxCpuMicroseconds = process.uptime() * 1e6 * os.availableParallelism();
+assert.ok(cpu.user > 1000 && cpu.user < maxCpuMicroseconds, "cpuUsage is microseconds");
 const delays = monitorEventLoopDelay({ resolution: 10 });
 delays.enable();
 await new Promise((resolve) => setTimeout(resolve, 100));
 delays.disable();
-assert.ok(delays.min > 1e6, `event loop delays are nanoseconds: ${delays.min}`);
+assert.ok(delays.min > 1e6 && delays.min < 1e9, `event loop delays are nanoseconds: ${delays.min}`);
 
 // Encodings that keep a path a path, and text without lone surrogates.
 for (const encoding of ["utf8", "latin1", "ascii"]) assert.ok(path.isAbsolute(fs.realpathSync(".", encoding)));
@@ -167,8 +176,12 @@ assert.equal(http2.getDefaultSettings().maxFrameSize, 16384, "http2 settings are
 
 // More units.
 assert.ok(process.hrtime()[1] < 1e9);
-if (process.threadCpuUsage) assert.ok(process.threadCpuUsage().user > 1000, "threadCpuUsage is microseconds");
-assert.ok(v8.getHeapStatistics().used_heap_size > 1e6, "heap statistics are bytes");
+if (process.threadCpuUsage) {
+	const { user } = process.threadCpuUsage();
+	assert.ok(user > 1000 && user < maxCpuMicroseconds, "threadCpuUsage is microseconds");
+}
+const usedHeap = v8.getHeapStatistics().used_heap_size;
+assert.ok(usedHeap > 1e6 && usedHeap < os.totalmem(), "heap statistics are bytes");
 assert.ok(fs.statSync(".").blksize >= 512, "blksize is bytes");
 assert.equal(process.umask(), process.umask(), "umask() returns the mask");
 const gcProfiler = new v8.GCProfiler();
@@ -178,6 +191,7 @@ assert.ok(Math.abs(gcResult.startTime - Date.now()) < 60_000, "GCProfiler times 
 if (v8.startCpuProfile) JSON.parse(v8.startCpuProfile().stop());
 const elu = performance.eventLoopUtilization();
 assert.ok(elu.idle + elu.active <= performance.now() + 1, "eventLoopUtilization is milliseconds");
+assert.ok(elu.idle + elu.active > performance.now() / 2, "eventLoopUtilization is milliseconds");
 if (DatabaseSync.prototype.location) {
 	const tmpDb = path.join(tmp, `branded-${process.pid}.db`);
 	const db = new DatabaseSync(tmpDb);

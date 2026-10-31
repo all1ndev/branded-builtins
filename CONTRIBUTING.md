@@ -28,7 +28,7 @@ ES entries build on each other in a chain, because ES and web APIs are never rem
 
 1. Add the brand type to `src/index.ts`.
 2. Add the overload where every version that has the API loads it. For Node, that's usually `src/node/modules.ts` (or `globals.ts`) plus `src/node22-24/modules.ts`, with the module named as each layout declares it.
-3. If the overload takes narrower input than the original, restate the original's last signature after it, as for `Math.floor` or `fs.readFileSync`: TypeScript reads the last overload when a function is passed as a value or reflected with `ReturnType`.
+3. If the overload takes narrower input than the original, restate the original's last signature after it, as for `Math.floor`: TypeScript reads the last overload when a function is passed as a value or reflected with `ReturnType`. When the original has other overloads, add `this: never` to the copy so calls skip it, as for `fs.readFileSync`. `test/overloads.mjs` fails on a group that misses this.
 4. Add only APIs the entry's `lib` or `@types/node` already declares. An overload for a missing method silently creates it.
 5. Add a `satisfies` line to the tests, and a `@ts-expect-error` line for the plain case that must stay unbranded.
 6. If the brand claims a runtime fact (a path is absolute, a value is in kilobytes), check it in `test/runtime.mjs`.

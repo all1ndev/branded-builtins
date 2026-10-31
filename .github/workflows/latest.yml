@@ -23,5 +23,7 @@ jobs:
                   @types26/node@npm:@types/node@latest
                   typescript@latest
                   typescript5@npm:typescript@^5
-            - run: npm ls @types22/node @types24/node @types26/node typescript typescript5
+            # Logs the installed versions. A new major is outside the devDependency ranges, which npm ls
+            # reports as invalid, so its exit code is ignored.
+            - run: npm ls @types22/node @types24/node @types26/node typescript typescript5 || true
             - run: npm test

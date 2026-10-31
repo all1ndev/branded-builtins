@@ -2,6 +2,7 @@
 // supports. Needs no host types.
 
 import type {
+	BrandTags,
 	CurrencyCode,
 	EncodedUri,
 	EncodedUriComponent,
@@ -22,6 +23,15 @@ import type {
 	WellFormedString,
 } from "../index.ts";
 
+// The primitive under a brand. Unbranded types, literal unions included, stay as they are.
+type Unbranded<T> = T extends string & BrandTags<string>
+	? string
+	: T extends number & BrandTags<string>
+		? number
+		: T extends bigint & BrandTags<string>
+			? bigint
+			: T;
+
 declare global {
 	interface DateConstructor {
 		now(): EpochMilliseconds;
@@ -29,7 +39,7 @@ declare global {
 		parse(s: string): EpochMilliseconds;
 		UTC(
 			year: number,
-			monthIndex: number,
+			monthIndex?: number,
 			date?: number,
 			hours?: number,
 			minutes?: number,
@@ -72,6 +82,7 @@ declare global {
 		normalize(form: "NFKD"): NfkdString;
 		// NFC is the default form.
 		normalize(): NfcString;
+		normalize(this: never, form?: string): string;
 		isWellFormed(): this is WellFormedString;
 		toWellFormed(): WellFormedString;
 		// Strings are shorter than 2 ** 53, so their indexes are safe.
@@ -79,12 +90,18 @@ declare global {
 		lastIndexOf(searchString: string, position?: number): SafeInteger;
 		// A custom searcher can return anything, so only strings and RegExps are branded.
 		search(regexp: string | RegExp): SafeInteger;
+		search(this: never, searcher: { [Symbol.search](string: string): number }): number;
 		codePointAt(pos: number): SafeInteger | undefined;
 	}
 
-	// Arrays are shorter than 2 ** 32, so their indexes and lengths are safe.
+	// Arrays are shorter than 2 ** 32, so their indexes and lengths are safe. An array of branded values
+	// can be searched for a plain one.
 	interface Array<T> {
+		includes(searchElement: Unbranded<T>, fromIndex?: number): boolean;
+		includes(searchElement: T, fromIndex?: number): boolean;
+		indexOf(searchElement: Unbranded<T>, fromIndex?: number): SafeInteger;
 		indexOf(searchElement: T, fromIndex?: number): SafeInteger;
+		lastIndexOf(searchElement: Unbranded<T>, fromIndex?: number): SafeInteger;
 		lastIndexOf(searchElement: T, fromIndex?: number): SafeInteger;
 		findIndex(predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: any): SafeInteger;
 		findLastIndex(predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: any): SafeInteger;
@@ -92,7 +109,11 @@ declare global {
 		unshift(...items: T[]): SafeInteger;
 	}
 	interface ReadonlyArray<T> {
+		includes(searchElement: Unbranded<T>, fromIndex?: number): boolean;
+		includes(searchElement: T, fromIndex?: number): boolean;
+		indexOf(searchElement: Unbranded<T>, fromIndex?: number): SafeInteger;
 		indexOf(searchElement: T, fromIndex?: number): SafeInteger;
+		lastIndexOf(searchElement: Unbranded<T>, fromIndex?: number): SafeInteger;
 		lastIndexOf(searchElement: T, fromIndex?: number): SafeInteger;
 		findIndex(predicate: (value: T, index: number, obj: readonly T[]) => unknown, thisArg?: any): SafeInteger;
 		findLastIndex(predicate: (value: T, index: number, array: readonly T[]) => unknown, thisArg?: any): SafeInteger;
@@ -134,6 +155,9 @@ declare global {
 		function getCanonicalLocales(locale?: string | readonly string[]): LanguageTag[];
 		function supportedValuesOf(key: "timeZone"): TimeZoneId[];
 		function supportedValuesOf(key: "currency"): CurrencyCode[];
+		function supportedValuesOf(
+			key: "calendar" | "collation" | "currency" | "numberingSystem" | "timeZone" | "unit",
+		): string[];
 		interface Locale {
 			toString(): LanguageTag;
 		}
